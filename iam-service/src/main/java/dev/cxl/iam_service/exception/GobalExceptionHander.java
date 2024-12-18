@@ -43,15 +43,15 @@ public class GobalExceptionHander {
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<APIResponse> handleAccessDeniedException(AccessDeniedException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
-        return ResponseEntity.status(errorCode.getStatusCode())
-                .body(APIResponse.builder()
-                        .code(errorCode.getCode())
-                        .mesage(errorCode.getMessage())
-                        .build());
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<APIResponse> handleAccessDeniedException(AccessDeniedException exception) {
+//        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+//        return ResponseEntity.status(errorCode.getStatusCode())
+//                .body(APIResponse.builder()
+//                        .code(errorCode.getCode())
+//                        .mesage(errorCode.getMessage())
+//                        .build());
+//    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception ex) {

@@ -18,15 +18,21 @@ import java.util.UUID;
         configuration = FeignClientConfiguration.class,
         fallbackFactory = IamClientFallback.class)
 public interface IamClient {
-    @GetMapping("/api/users/{userId}/authorities")
+    @GetMapping("/auth/{userId}/authorities-by-userid")
     @LoadBalanced
     Response<UserAuthority> getUserAuthority(@PathVariable UUID userId);
+
+    @GetMapping("/auth/{clientId}/authorities-by-clientId")
+    @LoadBalanced
+    BasedResponse<UserAuthority> getClientAuthority(@PathVariable String clientId);
 
     @GetMapping("/api/users/{username}/authorities-by-username")
     @LoadBalanced
     Response<UserAuthority> getUserAuthority(@PathVariable String username);
 
-    @GetMapping("/iam/client-token/{clientId}/{clientSecret}")
+    @GetMapping("/client-token/{clientId}/{clientSecret}")
     @LoadBalanced
     BasedResponse<String> getClientToken(@PathVariable String clientId, @PathVariable String clientSecret);
+
+
 }

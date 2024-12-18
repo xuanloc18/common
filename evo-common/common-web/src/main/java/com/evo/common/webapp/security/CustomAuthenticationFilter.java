@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -40,27 +42,33 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         log.info("CustomAuthenticationFilter");
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        JwtAuthenticationToken authentication =
-                (JwtAuthenticationToken) securityContext.getAuthentication();
+        JwtAuthenticationToken authentication = (JwtAuthenticationToken) securityContext.getAuthentication();
         Jwt token = authentication.getToken();
-
-        Boolean isRoot = Boolean.FALSE;
+        String claim = "", id = "";
+        Boolean isRoot ;
         Boolean isClient = Boolean.FALSE;
 
-        Optional<UserAuthority> optionalUserAuthority = enrichAuthority(token);
-        //@TODO enrich
-
         Set<SimpleGrantedAuthority> grantedPermissions = new HashSet<>();
-        String username;
-        if (StringUtils.hasText(token.getClaimAsString("preferred_username"))) {
-            username = token.getClaimAsString("preferred_username");
-        } else {
-            username = token.getClaimAsString("sub");
+        if (StringUtils.hasText(token.getClaimAsString("client_id"))) {
+            claim = "client_id";
+            id = token.getClaim("client_id");
+            isClient = Boolean.TRUE;
+        } else if (StringUtils.hasText(token.getClaimAsString("id_user"))) {
+            claim = "id_user";
+            id = token.getClaim("id_user");
         }
 
-        User principal = new User(username, "", grantedPermissions);
-        AbstractAuthenticationToken auth =
-                new UserAuthentication(principal, token, grantedPermissions, isRoot, isClient);
+        Optional<UserAuthority> optionalUserAuthority = enrichAuthority(token, claim);
+        UserAuthority userAuthority = optionalUserAuthority.orElse(null);
+
+        if (userAuthority != null && userAuthority.getGrantedPermissions() != null) {
+            grantedPermissions = userAuthority.getGrantedPermissions().stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toSet());
+        }
+        isRoot=userAuthority.getIsRoot();
+        User principal = new User(id, "", grantedPermissions);
+        AbstractAuthenticationToken auth = new UserAuthentication(principal, token, grantedPermissions, isRoot, isClient);
 
         SecurityContextHolder.getContext().setAuthentication(auth);
         filterChain.doFilter(request, response);
@@ -74,8 +82,22 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         return !(authentication instanceof JwtAuthenticationToken);
     }
 
-    private Optional<UserAuthority> enrichAuthority(Jwt token) {
-        // Call lấy UserAuthority từ IAM dựa vào AuthorityService lưu ý với service khác IAM thì impl sẽ là RemoteAuthorityServiceImpl, IAM thì sẽ dùng AuthorityServiceImpl(@Primary)
-        return Optional.empty();
+    private Optional<UserAuthority> enrichAuthority(Jwt token, String claim) {
+        String id = token.getClaimAsString(claim);
+        if (id == null) {
+            log.warn("Claim {} is missing or invalid", claim);
+            return Optional.empty();
+        }
+
+        switch (claim) {
+            case "client_id":
+                return Optional.ofNullable(authorityService.getClientAuthority(id));
+            case "id_user":
+                return Optional.ofNullable(authorityService.getUserAuthority(UUID.fromString(id)));
+            default:
+                log.warn("Unknown claim type: {}", claim);
+                return Optional.empty();
+        }
     }
+
 }

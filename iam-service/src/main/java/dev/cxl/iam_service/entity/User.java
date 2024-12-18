@@ -53,4 +53,8 @@ public class User extends AuditableEntity {
 
     @Column(name = "deleted")
     Boolean deleted = false;
+
+    @Builder.Default
+    @Column(name = "is_root", nullable = false)
+    private boolean isRoot = false;
 }

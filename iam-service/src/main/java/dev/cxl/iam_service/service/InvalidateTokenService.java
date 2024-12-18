@@ -23,4 +23,7 @@ public class InvalidateTokenService {
         Boolean check = tokenRepository.existsById(id);
         if (check) throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
+    public Boolean checkExists(String id) {
+        return tokenRepository.existsById(id);
+    }
 }

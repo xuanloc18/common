@@ -30,7 +30,7 @@ spring:
       jwt:
         jwk-set-uris:
           sso: ${JWK_SSO_URL:http://localhost:8080/realms/CXL/protocol/openid-connect/certs}
-          internal: ${JWK_INTERNAL_URL:http://localhost:8088/api/certificate/.well-known/jwks.json}
+          internal: ${JWK_INTERNAL_URL:http://localhost:8088/iam/auth/api/certificate/.well-known/jwks.json}
   jpa:
     hibernate:
       ddl-auto: update

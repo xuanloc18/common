@@ -17,16 +17,13 @@ public class RemoteAuthorityServiceImpl implements AuthorityService {
 
     @Override
     public UserAuthority getUserAuthority(UUID userId) {
-        return null;
+        return iamClient.getUserAuthority(userId).getData();
     }
 
-    @Override
-    public UserAuthority getUserAuthority(String username) {
-        return null;
-    }
+
 
     @Override
-    public UserAuthority getClientAuthority(UUID clientId) {
-        return null;
+    public UserAuthority getClientAuthority(String clientId) {
+        return iamClient.getClientAuthority(clientId).getData();
     }
 }

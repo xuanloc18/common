@@ -35,6 +35,12 @@ public class IamClientFallback implements FallbackFactory<IamClient> {
         }
 
         @Override
+        public BasedResponse<UserAuthority> getClientAuthority(String clientId) {
+            return null;
+        }
+
+
+        @Override
         public Response<UserAuthority> getUserAuthority(String username) {
             if (cause instanceof ForwardInnerAlertException) {
                 return Response.fail((RuntimeException) cause);
@@ -47,5 +53,7 @@ public class IamClientFallback implements FallbackFactory<IamClient> {
         public BasedResponse<String> getClientToken(String clientId, String clientSecret) {
             return null;
         }
+
+
     }
 }

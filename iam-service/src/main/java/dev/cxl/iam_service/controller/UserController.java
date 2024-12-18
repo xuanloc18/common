@@ -40,7 +40,7 @@ public class UserController {
     @Autowired
     StorageClient client;
 
-    @PreAuthorize("hasPermission('USER_DATA','VIEW')")
+//    @PreAuthorize("hasPermission('USER_DATA','VIEW')")
     @GetMapping
     APIResponse<PageResponse<UserResponse>> getAllUser(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,

@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.userdetails.User;
 
 public class SecurityUtils {
     public static String getAuthenticatedUserName(String attribute) {
@@ -14,8 +15,8 @@ public class SecurityUtils {
         // Kiểm tra nếu xác thực là dạng AbstractAuthenticationToken
         if (authentication instanceof AbstractAuthenticationToken) {
             // Lấy thông tin principal từ token
-            Object principal = ((AbstractAuthenticationToken) authentication).getPrincipal();
-            // Nếu principal là JWT, lấy claim "name"
+            Object principal = ((AbstractAuthenticationToken) authentication).getCredentials();
+            // Nếu principal là JWT, lấy
             if (principal instanceof Jwt jwt) {
                 return jwt.getClaim(attribute);
             } else {
@@ -29,14 +30,14 @@ public class SecurityUtils {
     public static String getAuthenticatedUserID() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            return null; // Nếu không có authentication
+            return "system"; // Nếu không có authentication
         }
         // Kiểm tra nếu xác thực là dạng AbstractAuthenticationToken
         if (authentication instanceof AbstractAuthenticationToken) {
-            // Lấy thông tin principal từ token
-            Object principal = ((AbstractAuthenticationToken) authentication).getPrincipal();
+            // Lấy thông tin credentials
+            Object credentials = ((AbstractAuthenticationToken) authentication).getCredentials();
             // Nếu principal là JWT, lấy claim "name"
-            if (principal instanceof Jwt jwt) {
+            if (credentials instanceof Jwt jwt) {
                 return jwt.getSubject();
             } else {
                 // Debug nếu principal không phải JWT

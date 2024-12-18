@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 import dev.cxl.iam_service.entity.InvalidateToken;
 
 @Repository
-public interface InvalidateTokenRepository extends JpaRepository<InvalidateToken, String> {}
+public interface InvalidateTokenRepository extends JpaRepository<InvalidateToken, String> {
+    boolean existsById(String id);
+}

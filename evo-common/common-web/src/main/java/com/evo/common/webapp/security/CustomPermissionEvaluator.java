@@ -1,4 +1,4 @@
-package com.evo.common.webapp.config;
+package com.evo.common.webapp.security;
 
 import com.evo.common.UserAuthentication;
 import lombok.extern.slf4j.Slf4j;
@@ -11,23 +11,23 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-public class RegexPermissionEvaluator implements PermissionEvaluator {
+public class CustomPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        String requiredPermission = permission.toString();
+        String requiredPermission = permission.toString()+"."+targetDomainObject.toString();
+        log.info("Matching permissionwith pattern: {}", requiredPermission);
+
         if (!(authentication instanceof UserAuthentication userAuthentication)) {
-            // @TODO throw exception
             throw new RuntimeException("NOT_SUPPORTED_AUTHENTICATION");
         }
-
         if (userAuthentication.isRoot()) {
             return true;
         }
 
         return userAuthentication.getGrantedPermissions().stream()
-                .anyMatch(p -> Pattern.matches(p, requiredPermission));
-    }
+                .anyMatch(p -> p.equalsIgnoreCase(requiredPermission));
 
+    }
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
         return hasPermission(authentication, null, permission);

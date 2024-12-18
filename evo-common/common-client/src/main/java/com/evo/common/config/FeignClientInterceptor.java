@@ -2,7 +2,9 @@ package com.evo.common.config;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +25,7 @@ public class FeignClientInterceptor implements RequestInterceptor {
         }
     }
     private String getClientToken() {
-        String tokenUrl = "http://localhost:8088/iam/client-token/{clientId}/{clientSecret}";
+        String tokenUrl = "http://localhost:8088/iam/auth/client-token/{clientId}/{clientSecret}";
         String clientId = client_id;
         String clientSecret = client_secret;
         RestTemplate restTemplate = new RestTemplate();
@@ -44,4 +46,25 @@ public class FeignClientInterceptor implements RequestInterceptor {
             throw new RuntimeException("Error while fetching client token: " + e.getMessage(), e);
         }
     }
+    public Boolean checkToken(String tokenID) {
+        String tokenUrl = "http://localhost:8088/iam/auth/{tokenId}/check-token-invalid";
+
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            // Call the auth service to get the token
+            ResponseEntity<Boolean> response = restTemplate.getForEntity(
+                    tokenUrl,
+                    Boolean.class,  // Chỉnh sửa từ String.class thành Boolean.class
+                    tokenID
+            );
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody(); // Assuming the token is the plain response body
+            } else {
+                throw new RuntimeException("Failed to retrieve token. Status: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error while fetching client token: " + e.getMessage(), e);
+        }
+    }
+
 }
