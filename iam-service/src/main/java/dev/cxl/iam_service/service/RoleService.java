@@ -1,5 +1,7 @@
 package dev.cxl.iam_service.service;
 
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,8 +11,6 @@ import dev.cxl.iam_service.dto.request.RoleRequest;
 import dev.cxl.iam_service.dto.response.PageResponse;
 import dev.cxl.iam_service.dto.response.RoleResponse;
 import dev.cxl.iam_service.entity.Role;
-import dev.cxl.iam_service.exception.AppException;
-import dev.cxl.iam_service.exception.ErrorCode;
 import dev.cxl.iam_service.mapper.RoleMapper;
 import dev.cxl.iam_service.respository.RoleRepository;
 import lombok.AccessLevel;

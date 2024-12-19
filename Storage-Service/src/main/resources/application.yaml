@@ -36,10 +36,6 @@ spring:
       ddl-auto: update
       dialect: org.hibernate.dialect.PostgreSQLDialect  # Ch? ??nh Dialect cho PostgreSQL
     show-sql: true
-  data:
-    redis:
-      host: localhost
-      port: 6379
   servlet:
     multipart:
       max-file-size: 5MB
@@ -78,6 +74,10 @@ file:
 app:
   iam:
     internal-url: http://localhost:8088/iam
+jwt:
+  valid-duration: 3600 #in second
+  refreshable-duration: 360000 #insecond
+
 
 
 

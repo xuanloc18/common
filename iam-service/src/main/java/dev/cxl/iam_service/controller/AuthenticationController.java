@@ -5,23 +5,20 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.*;
+
 import com.evo.common.UserAuthority;
 import com.evo.common.dto.response.BasedResponse;
 import com.evo.common.webapp.security.AuthorityService;
-import dev.cxl.iam_service.configuration.KeyProvider;
-import dev.cxl.iam_service.dto.response.DefaultClientTokenResponse;
-import dev.cxl.iam_service.service.InvalidateTokenService;
-import jakarta.websocket.server.PathParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.nimbusds.jose.JOSEException;
 
 import dev.cxl.iam_service.configuration.IdpConfig;
+import dev.cxl.iam_service.configuration.KeyProvider;
 import dev.cxl.iam_service.dto.identity.TokenExchangeResponseUser;
 import dev.cxl.iam_service.dto.request.*;
 import dev.cxl.iam_service.dto.response.APIResponse;
 import dev.cxl.iam_service.dto.response.AuthenticationResponse;
+import dev.cxl.iam_service.dto.response.DefaultClientTokenResponse;
 import dev.cxl.iam_service.dto.response.IntrospectResponse;
 import dev.cxl.iam_service.service.AuthenticationService;
 import dev.cxl.iam_service.service.UserService;
@@ -35,20 +32,15 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthenticationController {
 
+    private final AuthenticationService authenticationService;
 
-   private final AuthenticationService authenticationService;
+    private final UserService userService;
 
+    private final IdpConfig idpConfig;
 
-   private final UserService userService;
+    private final KeyProvider keyProvider;
 
-
-   private final IdpConfig idpConfig;
-
-   private final KeyProvider keyProvider;
-
-   private final AuthorityService authorityService;
-
-   private final InvalidateTokenService invalidateTokenService;
+    private final AuthorityService authorityService;
 
     @PostMapping("/login")
     public APIResponse<Object> login(@RequestBody AuthenticationRequest authenticationRequest) throws IOException {
@@ -66,14 +58,14 @@ public class AuthenticationController {
 
     @PostMapping("/logout")
     APIResponse<Void> logout(
-            @RequestHeader("authorization") String token, @PathParam("refreshToken") String refreshToken)
+            @RequestHeader("authorization") String token, @RequestParam("refreshToken") String refreshToken)
             throws ParseException, JOSEException {
         idpConfig.getAuthService().logout(token, refreshToken);
         return APIResponse.<Void>builder().build();
     }
 
     @PostMapping("/refresh")
-    APIResponse<TokenExchangeResponseUser> refresh(@PathParam("refreshToken") String refreshToken) throws Exception {
+    APIResponse<TokenExchangeResponseUser> refresh(@RequestParam("refreshToken") String refreshToken) throws Exception {
         return APIResponse.<TokenExchangeResponseUser>builder()
                 .result(idpConfig.getAuthService().getRefreshToken(refreshToken))
                 .build();
@@ -99,6 +91,7 @@ public class AuthenticationController {
         var result = authenticationService.authenticate(two);
         return APIResponse.<AuthenticationResponse>builder().result(result).build();
     }
+
     @GetMapping("/client-token/{clientId}/{clientSecret}")
     public String getClientToken(DefaultClientTokenResponse request) {
         return authenticationService.generateClientToken(request.getClientId());
@@ -108,22 +101,16 @@ public class AuthenticationController {
     Map<String, Object> keys() {
         return this.keyProvider.jwkSet().toJSONObject();
     }
+
     @GetMapping("/{userid}/authorities-by-userid")
-    BasedResponse<UserAuthority> getUserAuthority(
-            @PathVariable UUID userid) {
-        return BasedResponse.success("Get authorities successful for user" + userid, authorityService.getUserAuthority(userid));
+    BasedResponse<UserAuthority> getUserAuthority(@PathVariable UUID userid) {
+        return BasedResponse.success(
+                "Get authorities successful for user" + userid, authorityService.getUserAuthority(userid));
     }
 
     @GetMapping("/{clientId}/authorities-by-clientId")
-    BasedResponse<UserAuthority> getClientAuthority(
-            @PathVariable String clientId) {
-        return BasedResponse.success("Get authorities successful for client " + clientId,
-                authorityService.getClientAuthority(clientId));
+    BasedResponse<UserAuthority> getClientAuthority(@PathVariable String clientId) {
+        return BasedResponse.success(
+                "Get authorities successful for client " + clientId, authorityService.getClientAuthority(clientId));
     }
-
-    @GetMapping("/{tokenId}/check-token-invalid")
-    Boolean checkTokenInvalid(@PathVariable String tokenId)  {
-        return invalidateTokenService.checkExists(tokenId);
-    }
-
 }

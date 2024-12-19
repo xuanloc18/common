@@ -36,6 +36,13 @@ public class FileControllerPrivate {
         return APIResponse.<String>builder().result("Thành công").build();
     }
 
+    @PostMapping("/import")
+    public String importFiles(@RequestPart("file") MultipartFile files, @RequestParam("ownerID") String ownerID)
+            throws IOException {
+
+        return fileServices.createFile(files, ownerID, false);
+    }
+
     @GetMapping("/{fileID}")
     public APIResponse<Files> getFilePrivate(@PathVariable("fileID") String fileID) {
         fileUtils.checkPrivate(fileID);

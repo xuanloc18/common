@@ -1,7 +1,9 @@
 package dev.cxl.iam_service.service.excel;
 
-import dev.cxl.iam_service.entity.UserInformation;
-import lombok.RequiredArgsConstructor;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -9,9 +11,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.List;
+import dev.cxl.iam_service.entity.UserInformation;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,9 @@ public class ExportService {
             Sheet sheet = workbook.createSheet("Users");
             // Tạo tiêu đề
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"Username", "Họ Tên", "Ngày Sinh", "Tên Đường", "Xã (Phường)", "Huyện", "Tỉnh", "Số Năm Kinh Nghiệm"};
+            String[] headers = {
+                "Username", "Họ Tên", "Ngày Sinh", "Tên Đường", "Xã (Phường)", "Huyện", "Tỉnh", "Số Năm Kinh Nghiệm"
+            };
             CellStyle headerStyle = workbook.createCellStyle();
             Font font = workbook.createFont();
             font.setBold(true);
@@ -58,6 +61,7 @@ public class ExportService {
         byte[] fileBytes = stream.readAllBytes();
 
         // Tạo MockMultipartFile từ byte[]
-        return new MockMultipartFile("file", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileBytes);
+        return new MockMultipartFile(
+                "file", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileBytes);
     }
 }

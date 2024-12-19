@@ -35,9 +35,6 @@ public interface PermissionRespository extends JpaRepository<Permission, String>
     Optional<String> findPermissionIdByUserAndScope(
             @Param("userID") String userID, @Param("resourceCode") String resourceCode, @Param("scope") String scope);
 
-
-
-
     @Query("SELECT p FROM Permission p "
             + "JOIN RolePermission rp ON p.id = rp.permissionId "
             + "JOIN UserRole ur ON rp.roleId = ur.roleID "
@@ -48,6 +45,5 @@ public interface PermissionRespository extends JpaRepository<Permission, String>
             + "AND ur.deleted = false "
             + "AND r.deleted = false "
             + "AND rp.deleted = false ")
-    List<Permission> findPermissionIdByUser(
-            @Param("userID") String userID);
+    List<Permission> findPermissionIdByUser(@Param("userID") String userID);
 }

@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-//(scanBasePackages = {"dev.cxl.iam_service", "com.evo.common"})
+// (scanBasePackages = {"dev.cxl.iam_service", "com.evo.common"})
 @SpringBootApplication
 @EnableFeignClients
 public class IAMServiceApplication {

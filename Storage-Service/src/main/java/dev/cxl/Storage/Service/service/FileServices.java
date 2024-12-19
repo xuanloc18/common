@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -27,8 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.cxl.Storage.Service.entity.Files;
-import dev.cxl.Storage.Service.exception.AppException;
-import dev.cxl.Storage.Service.exception.ErrorCode;
+
 import dev.cxl.Storage.Service.repository.FilesRepository;
 
 @Service
@@ -59,12 +60,11 @@ public class FileServices {
                     filesRepository.findFilesByOwnerIdAndDeletedFalse(ownerId).orElseThrow();
             deleteFile(file.getID());
         }
-        Files files1 = createFile(files, ownerId, true);
-        files1.getID();
-        return files1.getID();
+
+        return createFile(files, ownerId, true);
     }
 
-    public Files createFile(MultipartFile file, String ownerId, Boolean visibility) throws IOException {
+    public String createFile(MultipartFile file, String ownerId, Boolean visibility) throws IOException {
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         Path uploadPath = Paths.get(documentPath, currentDate);
         if (!java.nio.file.Files.exists(uploadPath)) {
@@ -76,7 +76,7 @@ public class FileServices {
         Path path = Paths.get(System.getProperty("user.dir"), String.valueOf(uploadPath));
         String filePath = path + "/" + fileNameDes;
         file.transferTo(new File(filePath));
-        return filesRepository.save(Files.builder()
+        Files files = filesRepository.save(Files.builder()
                 .ownerId(ownerId)
                 .fileName(fileName)
                 .fileSize(file.getSize())
@@ -85,6 +85,7 @@ public class FileServices {
                 .fileType(file.getContentType())
                 .deleted(false)
                 .build());
+        return files.getID();
     }
 
     public Files getFile(String id) {

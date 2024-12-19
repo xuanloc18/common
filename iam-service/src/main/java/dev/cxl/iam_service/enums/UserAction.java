@@ -9,7 +9,10 @@ public enum UserAction {
     RESET_PASSWORD("Khôi phục mật khẩu"),
     DELETE_ACCOUNT("Xóa tài khoản"),
     FAILED_LOGIN("Đăng nhập thất bại"),
+    IMPORT_EXCEL("import excel"),
+    EXPORT_EXCEL("export excel"),
     PASSWORD_EXPIRED("Mật khẩu hết hạn");
+
 
     private final String description;
 

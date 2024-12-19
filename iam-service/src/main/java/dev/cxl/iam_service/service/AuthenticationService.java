@@ -7,13 +7,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
+import com.evo.common.webapp.security.TokenCacheService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -28,8 +30,6 @@ import dev.cxl.iam_service.dto.response.AuthenticationResponse;
 import dev.cxl.iam_service.dto.response.IntrospectResponse;
 import dev.cxl.iam_service.entity.*;
 import dev.cxl.iam_service.enums.UserAction;
-import dev.cxl.iam_service.exception.AppException;
-import dev.cxl.iam_service.exception.ErrorCode;
 import dev.cxl.iam_service.respository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +44,7 @@ import lombok.experimental.NonFinal;
 public class AuthenticationService {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
 
-    @Autowired
-    UserRespository userRespository;
+    private final UserRespository userRespository;
 
     @NonFinal
     @Value("${jwt.valid-duration}")
@@ -53,25 +52,16 @@ public class AuthenticationService {
 
     @NonFinal
     @Value("${jwt.refreshable-duration}")
-    protected Long REFESHABLE_DURATION;
+    protected Long REFRESHABLE_DURATION;
 
-    @Autowired
-    KeyProvider keyProvider;
+    private final KeyProvider keyProvider;
 
-    @Autowired
-    private ActivityService activityService;
+    private final ActivityService activityService;
 
-    @Autowired
-    private TwoFactorAuthService twoFactorAuthService;
+    private final TwoFactorAuthService twoFactorAuthService;
 
-    @Autowired
-    private InvalidateRefreshTokenService invalidateRefreshTokenService;
-
-    @Autowired
-    private InvalidateTokenService invalidateTokenService;
-
-    @Autowired
-    private UtilUserService userUtil;
+    private final UtilUserService userUtil;
+    private final TokenCacheService tokenCacheService;
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
@@ -98,7 +88,7 @@ public class AuthenticationService {
         String idToken = signedJWT.getJWTClaimsSet().getJWTID();
         return AuthenticationResponse.builder()
                 .token(token)
-                .refreshToken(generrateRefreshToken(user.getUserID(), idToken))
+                .refreshToken(generateRefreshToken(user.getUserID(), idToken))
                 .authentication(true)
                 .build();
     }
@@ -113,8 +103,8 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("user_id",user.getUserID().toString())
-                .claim("id_user",user.getUserID().toString())
+                .claim("user_id", user.getUserID().toString())
+                .claim("id_user", user.getUserID().toString())
                 .claim("name", user.getUserName())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -128,7 +118,7 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
-    //Token client
+    // Token client
     public String generateClientToken(String client_id) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -136,8 +126,8 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("user_id",client_id)
-                .claim("client_id",client_id)
+                .claim("user_id", client_id)
+                .claim("client_id", client_id)
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
@@ -151,13 +141,13 @@ public class AuthenticationService {
         }
     }
 
-    public String generrateRefreshToken(String userId, String idToken) {
+    public String generateRefreshToken(String userId, String idToken) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(userId)
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now()
-                        .plus(REFESHABLE_DURATION, ChronoUnit.SECONDS)
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
                         .toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("idToken", idToken)
@@ -183,11 +173,13 @@ public class AuthenticationService {
         if (!(veri && expiryTime.after(new Date()))) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-        invalidateTokenService.checkExits(signedJWT.getJWTClaimsSet().getJWTID());
+        if (tokenCacheService.isExistedToken(signedJWT.getJWTClaimsSet().getJWTID())) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
         return signedJWT;
     }
 
-    public void logout(String accessToken, String refreshToken) throws ParseException, JOSEException {
+    public void logout(String accessToken, String refreshToken) {
         try {
             accessToken = accessToken.replace("Bearer ", "");
             var signToken = verifyToken(accessToken);
@@ -195,8 +187,8 @@ public class AuthenticationService {
             String tokenID = signToken.getJWTClaimsSet().getJWTID();
             String refreshTokenID = signRefreshToken.getJWTClaimsSet().getJWTID();
             String userID = signToken.getJWTClaimsSet().getSubject();
-            invalidateTokenService.invalid(tokenID);
-            invalidateRefreshTokenService.invalid(refreshTokenID);
+            tokenCacheService.invalidRefreshToken(refreshTokenID);
+            tokenCacheService.invalidToken(tokenID);
 
             // activity
             activityService.createHistoryActivity(userID, UserAction.LOGOUT);
@@ -209,19 +201,27 @@ public class AuthenticationService {
     }
 
     public TokenExchangeResponseUser refreshToken(String refreshToken) throws ParseException, JOSEException {
+        log.info("Received refresh token: " + refreshToken);
         SignedJWT signedJWT = SignedJWT.parse(refreshToken);
-        invalidateRefreshTokenService.checkExits(signedJWT);
+        if (tokenCacheService.isExistedRefreshToken(signedJWT.getJWTClaimsSet().getJWTID())) {
+            log.info(
+                    "Refresh token {}",
+                    tokenCacheService.isExistedRefreshToken(
+                            signedJWT.getJWTClaimsSet().getJWTID()));
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
         verifyToken(refreshToken);
         String userId = signedJWT.getJWTClaimsSet().getSubject();
         String tokenId = signedJWT.getJWTClaimsSet().getStringClaim("idToken");
-        invalidateTokenService.invalid(tokenId);
-        invalidateRefreshTokenService.invalid(signedJWT.getJWTClaimsSet().getJWTID());
+        log.info("Received refresh token: {}", tokenId);
+        tokenCacheService.invalidToken(tokenId);
+        tokenCacheService.invalidRefreshToken(signedJWT.getJWTClaimsSet().getJWTID());
         User user = userRespository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
         var token = generateToken(user.getUserMail());
         SignedJWT signedJWT1 = SignedJWT.parse(token);
         return TokenExchangeResponseUser.builder()
                 .accessToken(token)
-                .refreshToken(generrateRefreshToken(
+                .refreshToken(generateRefreshToken(
                         userId, signedJWT1.getJWTClaimsSet().getJWTID()))
                 .build();
     }

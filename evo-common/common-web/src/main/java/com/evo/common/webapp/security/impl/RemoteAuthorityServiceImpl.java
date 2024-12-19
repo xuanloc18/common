@@ -20,8 +20,6 @@ public class RemoteAuthorityServiceImpl implements AuthorityService {
         return iamClient.getUserAuthority(userId).getData();
     }
 
-
-
     @Override
     public UserAuthority getClientAuthority(String clientId) {
         return iamClient.getClientAuthority(clientId).getData();

@@ -1,29 +1,28 @@
 package dev.cxl.iam_service.respository.impl;
 
-import dev.cxl.iam_service.dto.request.UserInformationSearchRequest;
-import dev.cxl.iam_service.entity.User;
-import dev.cxl.iam_service.entity.UserInformation;
-import dev.cxl.iam_service.respository.custom.UserInformationRepositoryCustom;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import org.apache.commons.lang3.StringUtils;
-
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+
+import org.apache.commons.lang3.StringUtils;
+
+import dev.cxl.iam_service.dto.request.UserInformationSearchRequest;
+import dev.cxl.iam_service.entity.UserInformation;
+import dev.cxl.iam_service.respository.custom.UserInformationRepositoryCustom;
 
 public class UserInformationRepositoryImpl implements UserInformationRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Override
     public List<UserInformation> search(UserInformationSearchRequest request) {
         Map<String, Object> values = new HashMap<>();
-        String sql =
-                "select u from UserInformation u " + createWhereQuery(request, values) + createOrderQuery(request.getSortBy());
+        String sql = "select u from UserInformation u " + createWhereQuery(request, values)
+                + createOrderQuery(request.getSortBy());
         Query query = entityManager.createQuery(sql, UserInformation.class);
         values.forEach(query::setParameter);
         query.setFirstResult((request.getPageIndex() - 1) * request.getPageSize());
@@ -68,8 +67,4 @@ public class UserInformationRepositoryImpl implements UserInformationRepositoryC
         }
         return hql;
     }
-
-
 }
-
-

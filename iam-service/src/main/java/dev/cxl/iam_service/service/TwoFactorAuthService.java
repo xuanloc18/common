@@ -2,6 +2,8 @@ package dev.cxl.iam_service.service;
 
 import java.util.concurrent.TimeUnit;
 
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,8 +13,7 @@ import org.springframework.stereotype.Service;
 import dev.cxl.iam_service.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.dto.request.AuthenticationRequestTwo;
 import dev.cxl.iam_service.entity.User;
-import dev.cxl.iam_service.exception.AppException;
-import dev.cxl.iam_service.exception.ErrorCode;
+
 
 @Service
 public class TwoFactorAuthService {
@@ -50,7 +51,6 @@ public class TwoFactorAuthService {
         String otp = generateOtp();
         emailService.SendEmail(user.getUserMail(), otp);
         redisTemplate.opsForValue().set(user.getUserMail(), otp, 5, TimeUnit.MINUTES);
-
         return true;
     }
 

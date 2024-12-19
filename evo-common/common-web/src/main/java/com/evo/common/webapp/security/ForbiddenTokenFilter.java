@@ -1,6 +1,8 @@
 package com.evo.common.webapp.security;
 
 import com.evo.common.config.FeignClientInterceptor;
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -31,18 +34,20 @@ public class ForbiddenTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        FeignClientInterceptor feignClientInterceptor = new FeignClientInterceptor();
-        log.info("ForbiddenTokenFilter");
+
         SecurityContext securityContext = SecurityContextHolder.getContext();
         JwtAuthenticationToken authentication = (JwtAuthenticationToken) securityContext.getAuthentication();
         Jwt token = authentication.getToken();
         String idToken=token.getClaimAsString("jti");
-        if(feignClientInterceptor.checkToken(idToken)){
-            throw new RuntimeException("NOT_SUPPORTED_AUTHENTICATION");
+//        if(tokenCacheService.isExistedToken(idToken)){
+//            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+//        }
+        // nếu có AuthenticationException thì sẽ chạy vào JwtAuthenticationEntryPoint
+        if(tokenCacheService.isExistedToken(idToken)){
+            throw new AuthenticationException("Invalid token"){};
         }
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
-
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         SecurityContext securityContext = SecurityContextHolder.getContext();

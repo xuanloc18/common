@@ -35,6 +35,11 @@
 			<artifactId>common-client</artifactId>
 			<version>${common.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.evo.common</groupId>
+			<artifactId>common-model</artifactId>
+			<version>${common.version}</version>
+		</dependency>
 
 		<!-- Spring Boot Data JPA for database integration -->
 		<dependency>

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class UserInformation {
+public class UserInformation extends AuditableEntity {
     @Id
     private String username;
 
@@ -25,4 +25,5 @@ public class UserInformation {
     private String province;
     private Integer yearsOfExperience;
     private Boolean deleted;
+    private String fileID;
 }

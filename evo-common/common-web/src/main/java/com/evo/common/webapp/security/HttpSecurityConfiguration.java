@@ -54,6 +54,7 @@ public class HttpSecurityConfiguration {
                 );
                http.oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationManagerResolver(this.jwkResolver(this.jwtProperties)));
+        http.oauth2ResourceServer(oauth2 -> oauth2.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         http.addFilterAfter(this.forbiddenTokenFilter, BearerTokenAuthenticationFilter.class);
         http.addFilterAfter(this.customAuthenticationFilter, BearerTokenAuthenticationFilter.class);
         http.addFilterAfter(this.actionLogFilter, BearerTokenAuthenticationFilter.class);

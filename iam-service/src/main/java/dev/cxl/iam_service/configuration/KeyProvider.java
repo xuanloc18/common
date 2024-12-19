@@ -4,15 +4,16 @@ import java.security.KeyPair;
 import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.RSAKey;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
 import org.springframework.stereotype.Component;
+
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
 
 import dev.cxl.iam_service.dto.AuthenticationProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +39,10 @@ public class KeyProvider implements InitializingBean {
                 new KeyStoreKeyFactory(new ClassPathResource(keyStore), password.toCharArray());
         return keyStoreKeyFactory.getKeyPair(alias);
     }
+
     public JWKSet jwkSet() {
-        RSAKey.Builder builder = new RSAKey.Builder((RSAPublicKey) this.keyPair.getPublic()).keyUse(KeyUse.SIGNATURE)
+        RSAKey.Builder builder = new RSAKey.Builder((RSAPublicKey) this.keyPair.getPublic())
+                .keyUse(KeyUse.SIGNATURE)
                 .algorithm(JWSAlgorithm.RS256)
                 .keyID(UUID.randomUUID().toString());
         return new JWKSet(builder.build());
@@ -48,6 +51,4 @@ public class KeyProvider implements InitializingBean {
     public KeyPair getKeyPair() {
         return keyPair; // Trả về keyPair đã được khởi tạo trong afterPropertiesSet()
     }
-
-
 }

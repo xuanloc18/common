@@ -3,8 +3,9 @@ package dev.cxl.iam_service.service;
 import java.text.ParseException;
 import java.util.*;
 
-import com.evo.common.client.storage.StorageClient;
-import com.evo.common.dto.response.APIResponse;
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
+import com.evo.common.webapp.security.TokenCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.evo.common.client.storage.StorageClient;
+import com.evo.common.dto.response.APIResponse;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 
@@ -26,15 +29,10 @@ import dev.cxl.iam_service.configuration.SecurityUtils;
 import dev.cxl.iam_service.dto.request.*;
 import dev.cxl.iam_service.dto.response.PageResponse;
 import dev.cxl.iam_service.dto.response.UserResponse;
-import dev.cxl.iam_service.entity.InvalidateToken;
 import dev.cxl.iam_service.entity.User;
 import dev.cxl.iam_service.enums.UserAction;
-import dev.cxl.iam_service.exception.AppException;
-import dev.cxl.iam_service.exception.ErrorCode;
 import dev.cxl.iam_service.mapper.UserMapper;
-import dev.cxl.iam_service.respository.InvalidateTokenRepository;
 import dev.cxl.iam_service.respository.UserRespository;
-
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
@@ -59,9 +57,6 @@ public class UserService {
     AuthenticationService authenticationService;
 
     @Autowired
-    private InvalidateTokenRepository invalidateTokenRepository;
-
-    @Autowired
     private ActivityService activityService;
 
     @Autowired
@@ -78,6 +73,8 @@ public class UserService {
 
     @Value("${idp.enable}")
     Boolean idpEnable;
+    @Autowired
+    TokenCacheService tokenService;
 
     public UserResponse createUser(UserCreationRequest request) {
         if (userRespository.existsByUserMail(request.getUserMail())) {
@@ -209,9 +206,8 @@ public class UserService {
         userRespository.save(user);
 
         // Save history activity
-        invalidateTokenRepository.save(InvalidateToken.builder()
-                .id(signedJWT.getJWTClaimsSet().getJWTID())
-                .build());
+        tokenService.invalidToken(signedJWT.getJWTClaimsSet().getJWTID());
+
         return true;
     }
 

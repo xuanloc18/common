@@ -1,5 +1,8 @@
-package dev.cxl.Storage.Service.exception;
+package com.evo.common.exception;
 
+
+import com.evo.common.dto.response.APIResponse;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -7,12 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import dev.cxl.Storage.Service.dto.response.APIResponse;
-import lombok.extern.log4j.Log4j2;
-
 @Log4j2
 @ControllerAdvice
-public class GobalExceptionHander {
+public class GlobalExceptionHanded {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<APIResponse> handleRuntimeException(RuntimeException exception) {
@@ -43,15 +43,15 @@ public class GobalExceptionHander {
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<APIResponse> handleAccessDeniedException(AccessDeniedException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
-        return ResponseEntity.status(errorCode.getStatusCode())
-                .body(APIResponse.builder()
-                        .code(errorCode.getCode())
-                        .mesage(errorCode.getMessage())
-                        .build());
-    }
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<APIResponse> handleAccessDeniedException(AccessDeniedException exception) {
+            ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+            return ResponseEntity.status(errorCode.getStatusCode())
+                    .body(APIResponse.builder()
+                            .code(errorCode.getCode())
+                            .mesage(errorCode.getMessage())
+                            .build());
+        }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception ex) {

@@ -1,6 +1,7 @@
 package dev.cxl.iam_service.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,8 +10,7 @@ import dev.cxl.iam_service.dto.request.PermissionRequest;
 import dev.cxl.iam_service.dto.response.PageResponse;
 import dev.cxl.iam_service.dto.response.PermissionResponse;
 import dev.cxl.iam_service.entity.Permission;
-import dev.cxl.iam_service.exception.AppException;
-import dev.cxl.iam_service.exception.ErrorCode;
+
 import dev.cxl.iam_service.mapper.PermissionMapper;
 import dev.cxl.iam_service.respository.PermissionRespository;
 import lombok.AccessLevel;
@@ -22,19 +22,17 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 public class PermissionService {
 
-    @Autowired
-    PermissionRespository permissionRespository;
+    private final PermissionRespository permissionRespository;
 
-    @Autowired
-    PermissionMapper mapper;
+    private final PermissionMapper permissionMapper;
 
     public PermissionResponse createPermission(PermissionRequest request) {
         Boolean check =
                 permissionRespository.existsByResourceCodeAndScope(request.getResourceCode(), request.getScope());
         if (check) throw new AppException(ErrorCode.PERMISSION_EXISTED);
-        Permission permission = mapper.toPermission(request);
+        Permission permission = permissionMapper.toPermission(request);
         permission.setDeleted(false);
-        return mapper.toPermissionResponse(permissionRespository.save(permission));
+        return permissionMapper.toPermissionResponse(permissionRespository.save(permission));
     }
 
     public PageResponse<PermissionResponse> getListsPer(int page, int size) {
@@ -46,7 +44,7 @@ public class PermissionService {
                 .totalElements(data.getTotalElements())
                 .totalPages(data.getTotalPages())
                 .data(data.getContent().stream()
-                        .map(permission -> mapper.toPermissionResponse(permission))
+                        .map(permission -> permissionMapper.toPermissionResponse(permission))
                         .toList())
                 .build();
     }

@@ -1,6 +1,8 @@
 package com.evo.common.webapp.security;
 
 import com.evo.common.UserAuthentication;
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -18,7 +20,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         log.info("Matching permissionwith pattern: {}", requiredPermission);
 
         if (!(authentication instanceof UserAuthentication userAuthentication)) {
-            throw new RuntimeException("NOT_SUPPORTED_AUTHENTICATION");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         if (userAuthentication.isRoot()) {
             return true;

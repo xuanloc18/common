@@ -1,4 +1,4 @@
-package dev.cxl.Storage.Service.exception;
+package com.evo.common.exception;
 
 public class AppException extends RuntimeException {
     public AppException(ErrorCode errorCode) {

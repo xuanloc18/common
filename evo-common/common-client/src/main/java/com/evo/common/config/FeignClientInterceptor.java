@@ -46,25 +46,6 @@ public class FeignClientInterceptor implements RequestInterceptor {
             throw new RuntimeException("Error while fetching client token: " + e.getMessage(), e);
         }
     }
-    public Boolean checkToken(String tokenID) {
-        String tokenUrl = "http://localhost:8088/iam/auth/{tokenId}/check-token-invalid";
 
-        RestTemplate restTemplate = new RestTemplate();
-        try {
-            // Call the auth service to get the token
-            ResponseEntity<Boolean> response = restTemplate.getForEntity(
-                    tokenUrl,
-                    Boolean.class,  // Chỉnh sửa từ String.class thành Boolean.class
-                    tokenID
-            );
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return response.getBody(); // Assuming the token is the plain response body
-            } else {
-                throw new RuntimeException("Failed to retrieve token. Status: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error while fetching client token: " + e.getMessage(), e);
-        }
-    }
 
 }
