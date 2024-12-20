@@ -1,5 +1,6 @@
 package com.evo.common.config;
 
+import com.evo.common.client.iam.IamClient;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,7 @@ public class FeignClientInterceptor implements RequestInterceptor {
         }
     }
     private String getClientToken() {
+
         String tokenUrl = "http://localhost:8088/iam/auth/client-token/{clientId}/{clientSecret}";
         String clientId = client_id;
         String clientSecret = client_secret;

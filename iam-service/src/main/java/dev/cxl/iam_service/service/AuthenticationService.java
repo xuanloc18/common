@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
+import dev.cxl.iam_service.dto.response.DefaultClientTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +63,7 @@ public class AuthenticationService {
 
     private final UtilUserService userUtil;
     private final TokenCacheService tokenCacheService;
+    private final ClientsService clientsService;
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
@@ -119,15 +121,16 @@ public class AuthenticationService {
         }
     }
     // Token client
-    public String generateClientToken(String client_id) {
+    public String generateClientToken(DefaultClientTokenResponse request) {
+//        clientsService.checkClientExists(request.getClientId(), request.getClientSecret());
         JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("user_id", client_id)
-                .claim("client_id", client_id)
+                .claim("user_id", request.getClientId())
+                .claim("client_id", request.getClientId())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);

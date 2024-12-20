@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
+import dev.cxl.iam_service.service.ClientsService;
 import org.springframework.web.bind.annotation.*;
 
 import com.evo.common.UserAuthority;
@@ -41,6 +42,8 @@ public class AuthenticationController {
     private final KeyProvider keyProvider;
 
     private final AuthorityService authorityService;
+
+    private final ClientsService clientsService;
 
     @PostMapping("/login")
     public APIResponse<Object> login(@RequestBody AuthenticationRequest authenticationRequest) throws IOException {
@@ -94,7 +97,7 @@ public class AuthenticationController {
 
     @GetMapping("/client-token/{clientId}/{clientSecret}")
     public String getClientToken(DefaultClientTokenResponse request) {
-        return authenticationService.generateClientToken(request.getClientId());
+        return authenticationService.generateClientToken(request);
     }
 
     @GetMapping("/api/certificate/.well-known/jwks.json")
@@ -113,4 +116,5 @@ public class AuthenticationController {
         return BasedResponse.success(
                 "Get authorities successful for client " + clientId, authorityService.getClientAuthority(clientId));
     }
+
 }
