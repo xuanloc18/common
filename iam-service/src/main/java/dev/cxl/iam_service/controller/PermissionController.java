@@ -1,6 +1,5 @@
 package dev.cxl.iam_service.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +12,12 @@ import dev.cxl.iam_service.service.PermissionService;
 @RestController
 @RequestMapping("/permissions")
 public class PermissionController {
-    @Autowired
-    PermissionService permissionService;
+
+    private final PermissionService permissionService;
+
+    public PermissionController(PermissionService permissionService) {
+        this.permissionService = permissionService;
+    }
 
     @PreAuthorize("hasPermission('PERMISSION_DATA','CREATE')")
     @PostMapping

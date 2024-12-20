@@ -1,9 +1,9 @@
 package dev.cxl.iam_service.service;
 
+import org.springframework.stereotype.Service;
+
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import dev.cxl.iam_service.entity.Role;
 import dev.cxl.iam_service.entity.User;
@@ -13,14 +13,19 @@ import dev.cxl.iam_service.respository.UserRoleRepository;
 
 @Service
 public class UserRoleService {
-    @Autowired
-    RoleRepository roleRepository;
 
-    @Autowired
-    UserRoleRepository userRoleRepository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    UtilUserService utilUser;
+    private final UserRoleRepository userRoleRepository;
+
+    private final UtilUserService utilUser;
+
+    public UserRoleService(
+            RoleRepository roleRepository, UserRoleRepository userRoleRepository, UtilUserService utilUser) {
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.utilUser = utilUser;
+    }
 
     public UserRole createUserRole(String userMail, String roleCode) {
         User user = utilUser.finUserMail(userMail);

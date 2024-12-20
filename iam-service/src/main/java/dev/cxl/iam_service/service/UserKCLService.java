@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,8 +21,7 @@ public class UserKCLService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
-    IndentityClient indentityClient;
+    private final IndentityClient indentityClient;
 
     @Value("${idp.client-id}")
     @NonFinal
@@ -33,8 +31,12 @@ public class UserKCLService {
     @NonFinal
     String idpClientSecret;
 
-    @Autowired
-    UtilUserService utilUser;
+    private final UtilUserService utilUser;
+
+    public UserKCLService(IndentityClient indentityClient, UtilUserService utilUser) {
+        this.indentityClient = indentityClient;
+        this.utilUser = utilUser;
+    }
 
     public String createUserKCL(UserCreationRequest request) {
 

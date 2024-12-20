@@ -13,7 +13,6 @@ public enum UserAction {
     EXPORT_EXCEL("export excel"),
     PASSWORD_EXPIRED("Mật khẩu hết hạn");
 
-
     private final String description;
 
     // Constructor

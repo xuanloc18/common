@@ -1,9 +1,9 @@
 package dev.cxl.iam_service.service;
 
+import org.springframework.stereotype.Service;
+
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import dev.cxl.iam_service.entity.Permission;
 import dev.cxl.iam_service.entity.Role;
@@ -14,14 +14,21 @@ import dev.cxl.iam_service.respository.RoleRepository;
 
 @Service
 public class RolePermissionService {
-    @Autowired
-    RoleRepository roleRepository;
 
-    @Autowired
-    PermissionRespository permissionRespository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    RolePermissionRepository rolePermissionRepository;
+    private final PermissionRespository permissionRespository;
+
+    private final RolePermissionRepository rolePermissionRepository;
+
+    public RolePermissionService(
+            RoleRepository roleRepository,
+            PermissionRespository permissionRespository,
+            RolePermissionRepository rolePermissionRepository) {
+        this.roleRepository = roleRepository;
+        this.permissionRespository = permissionRespository;
+        this.rolePermissionRepository = rolePermissionRepository;
+    }
 
     public RolePermission create(String roleCode, String perRe, String perCode) {
         Role role = roleRepository.findByCode(roleCode).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));

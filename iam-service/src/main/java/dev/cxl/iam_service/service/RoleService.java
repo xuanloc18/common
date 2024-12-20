@@ -1,11 +1,11 @@
 package dev.cxl.iam_service.service;
 
-import com.evo.common.exception.AppException;
-import com.evo.common.exception.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 
 import dev.cxl.iam_service.dto.request.RoleRequest;
 import dev.cxl.iam_service.dto.response.PageResponse;
@@ -21,11 +21,15 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Service
 public class RoleService {
-    @Autowired
-    RoleRepository roleRepository;
 
-    @Autowired
-    RoleMapper roleMapper;
+    private final RoleRepository roleRepository;
+
+    private final RoleMapper roleMapper;
+
+    public RoleService(RoleRepository roleRepository, RoleMapper roleMapper) {
+        this.roleRepository = roleRepository;
+        this.roleMapper = roleMapper;
+    }
 
     public RoleResponse create(RoleRequest request) {
         Boolean check = roleRepository.existsByCode(request.getCode());

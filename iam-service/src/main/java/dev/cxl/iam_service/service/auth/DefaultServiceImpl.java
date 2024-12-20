@@ -2,7 +2,6 @@ package dev.cxl.iam_service.service.auth;
 
 import java.text.ParseException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,26 +18,37 @@ import dev.cxl.iam_service.service.*;
 
 @Service
 public class DefaultServiceImpl implements IAuthService {
-    @Autowired
-    AuthenticationService authenticationService;
 
-    @Autowired
-    TwoFactorAuthService twoFactorAuthService;
+    private final AuthenticationService authenticationService;
 
-    @Autowired
-    UserService userService;
+    private final TwoFactorAuthService twoFactorAuthService;
 
-    @Autowired
-    private UserRespository userRespository;
+    private final UserService userService;
 
-    @Autowired
-    private UserKCLService userKCLService;
+    private final UserRespository userRespository;
 
-    @Autowired
-    private UtilUserService utilUser;
+    private final UserKCLService userKCLService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UtilUserService utilUser;
+
+    private final PasswordEncoder passwordEncoder;
+
+    public DefaultServiceImpl(
+            AuthenticationService authenticationService,
+            TwoFactorAuthService twoFactorAuthService,
+            UserService userService,
+            UserRespository userRespository,
+            UserKCLService userKCLService,
+            UtilUserService utilUser,
+            PasswordEncoder passwordEncoder) {
+        this.authenticationService = authenticationService;
+        this.twoFactorAuthService = twoFactorAuthService;
+        this.userService = userService;
+        this.userRespository = userRespository;
+        this.userKCLService = userKCLService;
+        this.utilUser = utilUser;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public Object login(AuthenticationRequest authenticationRequest) {

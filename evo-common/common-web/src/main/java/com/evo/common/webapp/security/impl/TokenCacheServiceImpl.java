@@ -22,8 +22,13 @@ public class TokenCacheServiceImpl implements TokenCacheService {
     @NonFinal
     @Value("${jwt.refreshable-duration}")
     protected Long REFRESHABLE_DURATION;
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public TokenCacheServiceImpl(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @Override
     public void invalidToken(String token) {
         // Thêm token vào Redis List

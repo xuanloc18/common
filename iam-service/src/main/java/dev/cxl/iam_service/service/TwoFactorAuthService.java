@@ -2,31 +2,31 @@ package dev.cxl.iam_service.service;
 
 import java.util.concurrent.TimeUnit;
 
-import com.evo.common.exception.AppException;
-import com.evo.common.exception.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
+
 import dev.cxl.iam_service.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.dto.request.AuthenticationRequestTwo;
 import dev.cxl.iam_service.entity.User;
 
-
 @Service
 public class TwoFactorAuthService {
 
-    @Autowired
-    EmailService emailService;
+    private final EmailService emailService;
 
-    @Autowired
-    UtilUserService utilUser;
+    private final UtilUserService utilUser;
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public TwoFactorAuthService(RedisTemplate<String, String> redisTemplate) {
+    public TwoFactorAuthService(
+            EmailService emailService, UtilUserService utilUser, RedisTemplate<String, String> redisTemplate) {
+        this.emailService = emailService;
+        this.utilUser = utilUser;
         this.redisTemplate = redisTemplate;
     }
 

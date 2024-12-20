@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
-import dev.cxl.iam_service.service.ClientsService;
 import org.springframework.web.bind.annotation.*;
 
 import com.evo.common.UserAuthority;
@@ -22,6 +21,7 @@ import dev.cxl.iam_service.dto.response.AuthenticationResponse;
 import dev.cxl.iam_service.dto.response.DefaultClientTokenResponse;
 import dev.cxl.iam_service.dto.response.IntrospectResponse;
 import dev.cxl.iam_service.service.AuthenticationService;
+import dev.cxl.iam_service.service.ClientsService;
 import dev.cxl.iam_service.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -116,5 +116,4 @@ public class AuthenticationController {
         return BasedResponse.success(
                 "Get authorities successful for client " + clientId, authorityService.getClientAuthority(clientId));
     }
-
 }

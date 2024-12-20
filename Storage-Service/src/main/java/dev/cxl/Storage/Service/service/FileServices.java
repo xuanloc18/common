@@ -13,12 +13,9 @@ import java.util.List;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 
-import com.evo.common.exception.AppException;
-import com.evo.common.exception.ErrorCode;
 import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.UrlResource;
@@ -28,20 +25,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import dev.cxl.Storage.Service.entity.Files;
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 
+import dev.cxl.Storage.Service.entity.Files;
 import dev.cxl.Storage.Service.repository.FilesRepository;
 
 @Service
 public class FileServices {
-    @Autowired
-    FilesRepository filesRepository;
 
-    @Autowired
-    FileUtils fileUtils;
+    private final FilesRepository filesRepository;
+
+    private final FileUtils fileUtils;
 
     @Value("${file.document.path}")
     String documentPath;
+
+    public FileServices(FilesRepository filesRepository, FileUtils fileUtils) {
+        this.filesRepository = filesRepository;
+        this.fileUtils = fileUtils;
+    }
 
     public Boolean createMoreFile(List<MultipartFile> files, String ownerId, Boolean visibility) {
         files.forEach(multipartFile -> {

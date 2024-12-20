@@ -1,6 +1,5 @@
 package dev.cxl.iam_service.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import dev.cxl.iam_service.dto.response.APIResponse;
@@ -10,8 +9,12 @@ import dev.cxl.iam_service.service.UserRoleService;
 @RestController
 @RequestMapping("user-role")
 public class UserRoleController {
-    @Autowired
-    UserRoleService userRoleService;
+
+    private final UserRoleService userRoleService;
+
+    public UserRoleController(UserRoleService userRoleService) {
+        this.userRoleService = userRoleService;
+    }
 
     @PostMapping
     public APIResponse<UserRole> createUserRole(

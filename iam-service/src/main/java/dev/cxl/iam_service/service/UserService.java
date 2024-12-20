@@ -3,12 +3,8 @@ package dev.cxl.iam_service.service;
 import java.text.ParseException;
 import java.util.*;
 
-import com.evo.common.exception.AppException;
-import com.evo.common.exception.ErrorCode;
-import com.evo.common.webapp.security.TokenCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -22,6 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.evo.common.client.storage.StorageClient;
 import com.evo.common.dto.response.APIResponse;
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
+import com.evo.common.webapp.security.TokenCacheService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 
@@ -41,40 +40,55 @@ import lombok.experimental.FieldDefaults;
 public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
-    private UserRespository userRespository;
+    private final UserRespository userRespository;
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    EmailService emailService;
+    private final EmailService emailService;
 
-    @Autowired
-    AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
-    @Autowired
-    private ActivityService activityService;
+    private final ActivityService activityService;
 
-    @Autowired
-    TwoFactorAuthService twoFactorAuthService;
+    private final TwoFactorAuthService twoFactorAuthService;
 
-    @Autowired
-    UserKCLService userKCLService;
+    private final UserKCLService userKCLService;
 
-    @Autowired
-    UtilUserService utilUser;
+    private final UtilUserService utilUser;
 
-    @Autowired
-    StorageClient client;
+    private final StorageClient client;
 
     @Value("${idp.enable}")
     Boolean idpEnable;
-    @Autowired
-    TokenCacheService tokenService;
+
+    private final TokenCacheService tokenService;
+
+    public UserService(
+            UserRespository userRespository,
+            UserMapper userMapper,
+            PasswordEncoder passwordEncoder,
+            EmailService emailService,
+            AuthenticationService authenticationService,
+            ActivityService activityService,
+            TwoFactorAuthService twoFactorAuthService,
+            UserKCLService userKCLService,
+            UtilUserService utilUser,
+            StorageClient client,
+            TokenCacheService tokenService) {
+        this.userRespository = userRespository;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.authenticationService = authenticationService;
+        this.activityService = activityService;
+        this.twoFactorAuthService = twoFactorAuthService;
+        this.userKCLService = userKCLService;
+        this.utilUser = utilUser;
+        this.client = client;
+        this.tokenService = tokenService;
+    }
 
     public UserResponse createUser(UserCreationRequest request) {
         if (userRespository.existsByUserMail(request.getUserMail())) {

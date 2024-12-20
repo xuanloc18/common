@@ -1,6 +1,5 @@
 package dev.cxl.iam_service.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +12,12 @@ import dev.cxl.iam_service.service.RoleService;
 @RestController
 @RequestMapping("/roles")
 public class RoleController {
-    @Autowired
-    RoleService roleService;
+
+    private final RoleService roleService;
+
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
+    }
 
     @PreAuthorize("hasPermission('ROLE_DATA','CREATE')")
     @PostMapping

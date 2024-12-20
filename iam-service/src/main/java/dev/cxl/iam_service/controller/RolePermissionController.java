@@ -1,6 +1,5 @@
 package dev.cxl.iam_service.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import dev.cxl.iam_service.dto.response.APIResponse;
@@ -10,8 +9,12 @@ import dev.cxl.iam_service.service.RolePermissionService;
 @RestController
 @RequestMapping("/role-permission")
 public class RolePermissionController {
-    @Autowired
-    RolePermissionService rolePermissionService;
+
+    private final RolePermissionService rolePermissionService;
+
+    public RolePermissionController(RolePermissionService rolePermissionService) {
+        this.rolePermissionService = rolePermissionService;
+    }
 
     @PostMapping
     public APIResponse<RolePermission> create(

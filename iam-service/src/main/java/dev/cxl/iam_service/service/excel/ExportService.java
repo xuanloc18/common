@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.cxl.iam_service.enums.UserAction;
-import dev.cxl.iam_service.service.ActivityService;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -17,7 +15,9 @@ import com.evo.common.client.storage.StorageClient;
 
 import dev.cxl.iam_service.configuration.SecurityUtils;
 import dev.cxl.iam_service.entity.UserInformation;
+import dev.cxl.iam_service.enums.UserAction;
 import dev.cxl.iam_service.respository.UserInformationRepository;
+import dev.cxl.iam_service.service.ActivityService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -26,6 +26,7 @@ public class ExportService {
     private final UserInformationRepository userInformationRepository;
     private final StorageClient storageClient;
     private final ActivityService activityService;
+
     public ByteArrayInputStream exportUsers(List<UserInformation> users) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Users");

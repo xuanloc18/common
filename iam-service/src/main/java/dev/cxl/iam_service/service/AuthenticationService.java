@@ -7,15 +7,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
-import com.evo.common.exception.AppException;
-import com.evo.common.exception.ErrorCode;
-import dev.cxl.iam_service.dto.response.DefaultClientTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 import com.evo.common.webapp.security.TokenCacheService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
@@ -28,6 +27,7 @@ import dev.cxl.iam_service.dto.AuthenticationProperties;
 import dev.cxl.iam_service.dto.identity.TokenExchangeResponseUser;
 import dev.cxl.iam_service.dto.request.*;
 import dev.cxl.iam_service.dto.response.AuthenticationResponse;
+import dev.cxl.iam_service.dto.response.DefaultClientTokenResponse;
 import dev.cxl.iam_service.dto.response.IntrospectResponse;
 import dev.cxl.iam_service.entity.*;
 import dev.cxl.iam_service.enums.UserAction;
@@ -122,7 +122,7 @@ public class AuthenticationService {
     }
     // Token client
     public String generateClientToken(DefaultClientTokenResponse request) {
-//        clientsService.checkClientExists(request.getClientId(), request.getClientSecret());
+        //        clientsService.checkClientExists(request.getClientId(), request.getClientSecret());
         JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .issueTime(new Date())

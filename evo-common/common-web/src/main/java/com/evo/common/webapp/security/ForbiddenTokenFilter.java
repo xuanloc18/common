@@ -36,6 +36,7 @@ public class ForbiddenTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
+        log.info("Security context : {}", securityContext);
         JwtAuthenticationToken authentication = (JwtAuthenticationToken) securityContext.getAuthentication();
         Jwt token = authentication.getToken();
         String idToken=token.getClaimAsString("jti");

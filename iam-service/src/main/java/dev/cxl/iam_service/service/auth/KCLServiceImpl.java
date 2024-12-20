@@ -2,11 +2,11 @@ package dev.cxl.iam_service.service.auth;
 
 import java.text.ParseException;
 
-import com.evo.common.exception.AppException;
-import com.evo.common.exception.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 
 import dev.cxl.iam_service.dto.identity.TokenExchangeResponseUser;
 import dev.cxl.iam_service.dto.request.AuthenticationRequest;
@@ -14,26 +14,34 @@ import dev.cxl.iam_service.dto.request.ResetPassword;
 import dev.cxl.iam_service.dto.request.UserCreationRequest;
 import dev.cxl.iam_service.dto.request.UserUpdateRequest;
 import dev.cxl.iam_service.entity.User;
-
 import dev.cxl.iam_service.respository.UserRespository;
 import dev.cxl.iam_service.service.*;
 
 @Service
 public class KCLServiceImpl implements IAuthService {
-    @Autowired
-    UserService userService;
 
-    @Autowired
-    UserKCLService userKCLService;
+    private final UserService userService;
 
-    @Autowired
-    private UserRespository userRespository;
+    private final UserKCLService userKCLService;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final UserRespository userRespository;
 
-    @Autowired
-    UtilUserService utilUser;
+    private final PasswordEncoder passwordEncoder;
+
+    private final UtilUserService utilUser;
+
+    public KCLServiceImpl(
+            UserService userService,
+            UserKCLService userKCLService,
+            UserRespository userRespository,
+            PasswordEncoder passwordEncoder,
+            UtilUserService utilUser) {
+        this.userService = userService;
+        this.userKCLService = userKCLService;
+        this.userRespository = userRespository;
+        this.passwordEncoder = passwordEncoder;
+        this.utilUser = utilUser;
+    }
 
     @Override
     public Object login(AuthenticationRequest authenticationRequest) {

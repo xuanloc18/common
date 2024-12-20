@@ -2,7 +2,6 @@ package dev.cxl.iam_service.controller;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,8 +14,12 @@ import dev.cxl.iam_service.service.PhotoService;
 @RestController
 @RequestMapping("/photo")
 public class PhotoController {
-    @Autowired
-    PhotoService photoService;
+
+    private final PhotoService photoService;
+
+    public PhotoController(PhotoService photoService) {
+        this.photoService = photoService;
+    }
 
     @PostMapping
     public APIResponse<String> uploadPhoto(@RequestParam("file") MultipartFile file) throws IOException {

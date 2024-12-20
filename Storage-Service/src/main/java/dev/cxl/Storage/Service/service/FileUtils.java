@@ -1,17 +1,21 @@
 package dev.cxl.Storage.Service.service;
 
+import org.springframework.stereotype.Service;
+
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import dev.cxl.Storage.Service.entity.Files;
 import dev.cxl.Storage.Service.repository.FilesRepository;
 
 @Service
 public class FileUtils {
-    @Autowired
-    FilesRepository filesRepository;
+
+    private final FilesRepository filesRepository;
+
+    public FileUtils(FilesRepository filesRepository) {
+        this.filesRepository = filesRepository;
+    }
 
     public void checkFileExist(String fileName) {
         if (filesRepository.existsFilesByFileName(fileName)) {
