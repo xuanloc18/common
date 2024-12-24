@@ -1,0 +1,39 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: true
+    gateway:
+      routes:
+        - id: iam-service
+#          uri: lb://IAM  # Tìm d?ch v? 'iam' qua Eureka
+          uri: http://192.168.94.65:8088
+          predicates:
+            - Path=/iam/**
+        - id: storage-service
+#          uri: lb://STORAGE  # Tìm d?ch v? 'storage' qua Eureka
+          uri: http://192.168.94.65:8099
+          predicates:
+            - Path=/storage/**
+      eureka:
+        client:
+          service-url:
+            defaultZone: http://localhost:8761/eureka/
+    discovery:
+      client:
+        simple:
+          registration-enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.netflix.eureka: DEBUG
+    org.springframework.cloud.client.loadbalancer: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
+
+
