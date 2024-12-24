@@ -1,25 +1,36 @@
-package dev.cxl.iam_service.service.excel;
+package dev.cxl.iam_service.application.service.excel;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.evo.common.client.storage.StorageClient;
+
+import dev.cxl.iam_service.application.configuration.SecurityUtils;
 import dev.cxl.iam_service.domain.entity.UserInformation;
+import dev.cxl.iam_service.domain.enums.UserAction;
+import dev.cxl.iam_service.infrastructure.respository.UserInformationRepository;
+import dev.cxl.iam_service.application.service.ActivityService;
 import lombok.RequiredArgsConstructor;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class ExportService {
+    private final UserInformationRepository userInformationRepository;
+    private final StorageClient storageClient;
+    private final ActivityService activityService;
+
     public ByteArrayInputStream exportUsers(List<UserInformation> users) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Users");
+
             // Tạo tiêu đề
             Row headerRow = sheet.createRow(0);
             String[] headers = {
@@ -56,12 +67,14 @@ public class ExportService {
         }
     }
 
-    public MultipartFile convertToMultipartFile(ByteArrayInputStream stream, String fileName) {
-        // Chuyển đổi từ ByteArrayInputStream sang byte[]
-        byte[] fileBytes = stream.readAllBytes();
-
-        // Tạo MockMultipartFile từ byte[]
-        return new MockMultipartFile(
-                "file", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileBytes);
+    public Boolean exportToStorage() throws IOException {
+        ByteArrayInputStream stream = exportUsers(userInformationRepository.findAll());
+        List<MultipartFile> multipartFile = new ArrayList<>();
+        MultipartFile multipartFile1 = FileUtils.convertToMultipartFile(stream, "users.xlsx");
+        multipartFile.add(multipartFile1);
+        String userID = SecurityUtils.getAuthenticatedUserID();
+        storageClient.createFiles(multipartFile, userID);
+        activityService.createHistoryActivity(userID, UserAction.EXPORT_EXCEL);
+        return true;
     }
 }

@@ -11,12 +11,12 @@ spring:
     gateway:
       routes:
         - id: iam-service
-#          uri: lb://IAM  # Tìm d?ch v? 'iam' qua Eureka
+#          uri: lb://IAM
           uri: http://192.168.94.65:8088
           predicates:
             - Path=/iam/**
         - id: storage-service
-#          uri: lb://STORAGE  # Tìm d?ch v? 'storage' qua Eureka
+#          uri: lb://STORAGE
           uri: http://192.168.94.65:8099
           predicates:
             - Path=/storage/**
@@ -28,6 +28,22 @@ spring:
       client:
         simple:
           registration-enabled: true
+  swagger-ui:
+    enabled: true
+springdoc:
+  api-docs:
+    enabled: true
+    group: gateway-api
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: API Gateway Service
+        url: /v3/api-docs/gateway-api
+      - name: IAM Service
+        url: /iam/iam-swagger/v3/api-docs
+      - name: Storage Service
+        url: /storage/storage-swagger/v3/api-docs
 
 logging:
   level:

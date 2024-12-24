@@ -61,6 +61,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
   api-docs:
+    path: /iam-swagger/v3/api-docs
     version: openapi_3_0
 
 # Lưu log vào file

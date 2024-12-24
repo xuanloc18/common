@@ -36,7 +36,9 @@ public class HttpSecurityConfiguration {
     private final CustomAuthenticationFilter customAuthenticationFilter;
     private final ForbiddenTokenFilter forbiddenTokenFilter;
     private final JwtProperties jwtProperties;
-
+    private final String[] SWAGGER_ENDPOINT = {
+            "/swagger-ui.html","/iam-swagger/**","/iam-swagger/**","/storage-swagger/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui/index.html","users/confirmCreateUser"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -49,6 +51,7 @@ public class HttpSecurityConfiguration {
                                 .requestMatchers("/api/certificate/.well-known/jwks.json").permitAll()
                                 .requestMatchers("/api/public/**").permitAll()
                                 .requestMatchers("/api/authenticate/**").permitAll()
+                                .requestMatchers(SWAGGER_ENDPOINT).permitAll()
                                 .anyRequest().authenticated()
 
                 );
