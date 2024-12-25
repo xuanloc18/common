@@ -11,7 +11,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import dev.cxl.iam_service.domain.entity.UserInformation;
+import dev.cxl.iam_service.infrastructure.entity.UserInformation;
 import lombok.RequiredArgsConstructor;
 
 @Service

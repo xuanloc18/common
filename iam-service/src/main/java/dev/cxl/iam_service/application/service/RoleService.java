@@ -1,5 +1,7 @@
 package dev.cxl.iam_service.application.service;
 
+import dev.cxl.iam_service.domain.domainentity.RoleDomain;
+import dev.cxl.iam_service.domain.repository.RoleRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,9 +12,9 @@ import com.evo.common.exception.ErrorCode;
 import dev.cxl.iam_service.application.dto.request.RoleRequest;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.RoleResponse;
-import dev.cxl.iam_service.domain.entity.Role;
+import dev.cxl.iam_service.infrastructure.entity.Role;
 import dev.cxl.iam_service.application.mapper.RoleMapper;
-import dev.cxl.iam_service.infrastructure.respository.RoleRepository;
+import dev.cxl.iam_service.infrastructure.persistent.JpaRoleRepository;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +33,12 @@ public class RoleService {
         this.roleMapper = roleMapper;
     }
 
+
     public RoleResponse create(RoleRequest request) {
         Boolean check = roleRepository.existsByCode(request.getCode());
         if (check) throw new AppException(ErrorCode.ROLE_EXISTED);
-        Role role = roleMapper.toRole(request);
-        role.setDeleted(false);
+        RoleDomain roleDomain=new RoleDomain().create(request);
+        Role role = roleMapper.toRole(roleDomain);
         role = roleRepository.save(role);
         return roleMapper.toRoleResponse(role);
     }
@@ -56,7 +59,8 @@ public class RoleService {
 
     public void delete(String id) {
         Role role = roleRepository.findByCode(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
-        role.setDeleted(true);
-        roleRepository.save(role);
+        RoleDomain roleDomain=roleMapper.toRoleDomain(role);
+        roleDomain.delete();
+        roleRepository.save(roleMapper.toRole(roleDomain));
     }
 }

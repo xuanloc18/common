@@ -1,5 +1,6 @@
 package dev.cxl.iam_service.application.service;
 
+import dev.cxl.iam_service.domain.repository.PermissionRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,9 +11,9 @@ import com.evo.common.exception.ErrorCode;
 import dev.cxl.iam_service.application.dto.request.PermissionRequest;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.PermissionResponse;
-import dev.cxl.iam_service.domain.entity.Permission;
+import dev.cxl.iam_service.infrastructure.entity.Permission;
 import dev.cxl.iam_service.application.mapper.PermissionMapper;
-import dev.cxl.iam_service.infrastructure.respository.PermissionRespository;
+import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 public class PermissionService {
 
-    private final PermissionRespository permissionRespository;
+    private final PermissionRepository permissionRespository;
 
     private final PermissionMapper permissionMapper;
 

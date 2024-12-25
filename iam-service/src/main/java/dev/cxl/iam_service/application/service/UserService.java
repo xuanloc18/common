@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.util.*;
 
 import dev.cxl.iam_service.application.dto.request.*;
+import dev.cxl.iam_service.domain.domainentity.UserDomain;
+import dev.cxl.iam_service.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +30,9 @@ import com.nimbusds.jwt.SignedJWT;
 import dev.cxl.iam_service.application.configuration.SecurityUtils;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
-import dev.cxl.iam_service.domain.entity.User;
+import dev.cxl.iam_service.infrastructure.entity.User;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.application.mapper.UserMapper;
-import dev.cxl.iam_service.infrastructure.respository.UserRespository;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
@@ -40,7 +41,7 @@ import lombok.experimental.FieldDefaults;
 public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    private final UserRespository userRespository;
+    private final UserRepository userRepository;
 
     private final UserMapper userMapper;
 
@@ -60,14 +61,15 @@ public class UserService {
 
     private final StorageClient client;
 
+
     @Value("${idp.enable}")
     Boolean idpEnable;
 
     private final TokenCacheService tokenService;
 
     public UserService(
-            UserRespository userRespository,
-            UserMapper userMapper,
+
+            UserRepository userRepository, UserMapper userMapper,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
             AuthenticationService authenticationService,
@@ -77,7 +79,7 @@ public class UserService {
             UtilUserService utilUser,
             StorageClient client,
             TokenCacheService tokenService) {
-        this.userRespository = userRespository;
+        this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -91,15 +93,15 @@ public class UserService {
     }
 
     public UserResponse createUser(UserCreationRequest request) {
-        if (userRespository.existsByUserMail(request.getUserMail())) {
+        if (userRepository.existsByUserMail(request.getUserMail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        User user = userMapper.toUser(request);
+        UserDomain userDomain= new UserDomain().create(request);
+        User user = userMapper.toUser(userDomain);
         user.setUserKCLID(userKCLService.createUserKCL(request));
-        user.setEnabled(false);
         user.setPassWord(passwordEncoder.encode(request.getPassWord()));
         twoFactorAuthService.sendCreatUser(user.getUserMail());
-        return userMapper.toUserResponse(userRespository.save(user));
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public UserResponse confirmCreateUser(String email, String otp) {
@@ -110,16 +112,14 @@ public class UserService {
             throw new AppException(ErrorCode.INVALID_OTP);
         }
         user.setEnabled(true);
-
         activityService.createHistoryActivity(user.getUserID(), UserAction.CREATE);
-
-        return userMapper.toUserResponse(userRespository.save(user));
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public PageResponse<UserResponse> getAllUsers(int page, int size) {
         Sort sort = Sort.by("userID").descending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
-        var pageData = userRespository.findAll(pageable);
+        var pageData = userRepository.findAll(pageable);
         return PageResponse.<UserResponse>builder()
                 .currentPage(page)
                 .pageSize(pageData.getSize())
@@ -134,12 +134,12 @@ public class UserService {
     public UserResponse updareUser(UserUpdateRequest request) {
         String userID = SecurityUtils.getAuthenticatedUserID();
         User user = utilUser.finUserId(userID);
-        user = userMapper.updateUser(user, request);
-        user.setPassWord(passwordEncoder.encode(request.getPassWord()));
-
+        UserDomain userDomain = userMapper.toUserDomain(user);
+        userDomain.update(request);
+        user = userMapper.toUser(userDomain);
         // Save history activity
         activityService.createHistoryActivity(user.getUserID(), UserAction.UPDATE_PROFILE);
-        return userMapper.toUserResponse(userRespository.save(user));
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public UserResponse getMyInfor() {
@@ -150,7 +150,6 @@ public class UserService {
         } else {
             user = utilUser.finUserId(id);
         }
-
         return userMapper.toUserResponse(user);
     }
 
@@ -168,19 +167,12 @@ public class UserService {
     public Boolean replacePassword(UserRepalcePass userRepalcePass) {
         String id = SecurityUtils.getAuthenticatedUserID();
         User user = utilUser.finUserId(id);
-        log.info(user.getUserMail());
-        log.info(user.getPassWord());
-        Boolean checkPass = passwordEncoder.matches(userRepalcePass.getOldPassword(), user.getPassWord());
-        if (!checkPass) throw new AppException(ErrorCode.INVALID_KEY);
-        Boolean aBoolean = userRepalcePass.getConfirmPassword().equals(userRepalcePass.getNewPassword());
-        if (!aBoolean) throw new RuntimeException("password does not confirm");
-
-        user.setPassWord(passwordEncoder.encode(userRepalcePass.getNewPassword()));
-        log.info(user.getPassWord());
-
+        UserDomain userDomain =userMapper.toUserDomain(user);
+        userDomain.changePassword(userRepalcePass,passwordEncoder);
+        User user2 = userMapper.toUser(userDomain);
         // Save history activity
         activityService.createHistoryActivity(user.getUserID(), UserAction.CHANGE_PASSWORD);
-        userRespository.save(user);
+        userRepository.save(user2);
         return true;
     }
 
@@ -189,7 +181,7 @@ public class UserService {
         User user = utilUser.finUserId(id);
         APIResponse<String> apiResponse = client.createProfile(file, SecurityUtils.getAuthenticatedUserID());
         user.setProfile(apiResponse.getResult());
-        userRespository.save(user);
+        userRepository.save(user);
         return true;
     }
 
@@ -217,7 +209,7 @@ public class UserService {
         String userid = signedJWT.getJWTClaimsSet().getSubject();
         User user = utilUser.finUserId(userid);
         user.setPassWord(passwordEncoder.encode(forgotPassWord.getNewPass()));
-        userRespository.save(user);
+        userRepository.save(user);
 
         // Save history activity
         tokenService.invalidToken(signedJWT.getJWTClaimsSet().getJWTID());
@@ -227,7 +219,7 @@ public class UserService {
 
     public List<UserResponse> findUserByKey(String keyKey, int page, int size, Object attribute, String key) {
         Pageable pageable = PageRequest.of(page - 1, size, sort(attribute, key));
-        Page<User> user = userRespository.findUsersByKey(keyKey, pageable);
+        Page<User> user = userRepository.findUsersByKey(keyKey, pageable);
         return user.getContent().stream()
                 .map(user1 -> userMapper.toUserResponse(user1))
                 .toList();

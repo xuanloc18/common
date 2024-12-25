@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.cxl.iam_service.domain.repository.UserInformationRepository;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -16,9 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.evo.common.client.storage.StorageClient;
 
 import dev.cxl.iam_service.application.configuration.SecurityUtils;
-import dev.cxl.iam_service.domain.entity.UserInformation;
+import dev.cxl.iam_service.infrastructure.entity.UserInformation;
 import dev.cxl.iam_service.domain.enums.UserAction;
-import dev.cxl.iam_service.infrastructure.respository.UserInformationRepository;
+import dev.cxl.iam_service.infrastructure.persistent.JpaUserInformationRepository;
 import dev.cxl.iam_service.application.service.ActivityService;
 import dev.cxl.iam_service.application.service.UtilUserService;
 import lombok.RequiredArgsConstructor;

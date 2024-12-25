@@ -11,12 +11,12 @@ spring:
     gateway:
       routes:
         - id: iam-service
-#          uri: lb://IAM
+#          uri: lb://iam
           uri: http://192.168.94.65:8088
           predicates:
             - Path=/iam/**
         - id: storage-service
-#          uri: lb://STORAGE
+#          uri: lb://storage
           uri: http://192.168.94.65:8099
           predicates:
             - Path=/storage/**

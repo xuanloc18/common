@@ -1,36 +1,38 @@
 package dev.cxl.iam_service.application.service;
 
+import dev.cxl.iam_service.domain.repository.UserInformationRepository;
+import dev.cxl.iam_service.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
-import dev.cxl.iam_service.domain.entity.User;
-import dev.cxl.iam_service.infrastructure.respository.UserInformationRepository;
-import dev.cxl.iam_service.infrastructure.respository.UserRespository;
+import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.persistent.JpaUserInformationRepository;
+import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
 
 @Service
 public class UtilUserService {
 
-    private final UserRespository userRespository;
+    private final UserRepository userRepository;
 
     private final UserInformationRepository userInformationRepository;
 
-    public UtilUserService(UserRespository userRespository, UserInformationRepository userInformationRepository) {
-        this.userRespository = userRespository;
+    public UtilUserService(UserRepository userRepository, UserInformationRepository userInformationRepository) {
+        this.userRepository = userRepository;
         this.userInformationRepository = userInformationRepository;
     }
 
     public User finUserId(String id) {
-        return userRespository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     public User finUserKCLId(String kCLSID) {
-        return userRespository.findByUserKCLID(kCLSID).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userRepository.findByUserKCLID(kCLSID).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     public User finUserMail(String userMail) {
-        return userRespository.findByUserMail(userMail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userRepository.findByUserMail(userMail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     public boolean userExists(String userName) {

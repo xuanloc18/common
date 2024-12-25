@@ -6,18 +6,18 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
 
-import dev.cxl.iam_service.domain.entity.HistoryActivity;
+import dev.cxl.iam_service.infrastructure.entity.HistoryActivity;
 import dev.cxl.iam_service.domain.enums.UserAction;
-import dev.cxl.iam_service.infrastructure.respository.HistoryActivityRepository;
+import dev.cxl.iam_service.infrastructure.persistent.JpaHistoryActivityRepository;
 
 @Service
 public class ActivityService {
 
-    private final HistoryActivityRepository historyActivityRepository;
+    private final JpaHistoryActivityRepository historyActivityRepository;
 
     private final HttpServletRequest request;
 
-    public ActivityService(HistoryActivityRepository historyActivityRepository, HttpServletRequest request) {
+    public ActivityService(JpaHistoryActivityRepository historyActivityRepository, HttpServletRequest request) {
         this.historyActivityRepository = historyActivityRepository;
         this.request = request;
     }

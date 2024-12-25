@@ -1,6 +1,6 @@
 package dev.cxl.iam_service.application.dto.response;
 
-import dev.cxl.iam_service.domain.entity.AuditableEntity;
+import dev.cxl.iam_service.infrastructure.entity.AuditableEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

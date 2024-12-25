@@ -9,8 +9,8 @@ import java.util.UUID;
 
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequestTwo;
 import dev.cxl.iam_service.application.dto.request.IntrospectRequest;
-import dev.cxl.iam_service.domain.entity.User;
-import dev.cxl.iam_service.infrastructure.respository.UserRespository;
+import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +46,7 @@ import lombok.experimental.NonFinal;
 public class AuthenticationService {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
 
-    private final UserRespository userRespository;
+    private final JpaUserRepository userRespository;
 
     @NonFinal
     @Value("${jwt.valid-duration}")
@@ -123,7 +123,7 @@ public class AuthenticationService {
     }
     // Token client
     public String generateClientToken(DefaultClientTokenResponse request) {
-        //        clientsService.checkClientExists(request.getClientId(), request.getClientSecret());
+        clientsService.checkClientExists(request.getClientId(), request.getClientSecret());
         JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .issueTime(new Date())

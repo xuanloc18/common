@@ -1,15 +1,17 @@
 package dev.cxl.iam_service.application.service;
 
+import dev.cxl.iam_service.domain.repository.RoleRepository;
+import dev.cxl.iam_service.domain.repository.UserRoleRepository;
 import org.springframework.stereotype.Service;
 
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
-import dev.cxl.iam_service.domain.entity.Role;
-import dev.cxl.iam_service.domain.entity.User;
-import dev.cxl.iam_service.domain.entity.UserRole;
-import dev.cxl.iam_service.infrastructure.respository.RoleRepository;
-import dev.cxl.iam_service.infrastructure.respository.UserRoleRepository;
+import dev.cxl.iam_service.infrastructure.entity.Role;
+import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.entity.UserRole;
+import dev.cxl.iam_service.infrastructure.persistent.JpaRoleRepository;
+import dev.cxl.iam_service.infrastructure.persistent.JpaUserRoleRepository;
 
 @Service
 public class UserRoleService {
@@ -20,12 +22,12 @@ public class UserRoleService {
 
     private final UtilUserService utilUser;
 
-    public UserRoleService(
-            RoleRepository roleRepository, UserRoleRepository userRoleRepository, UtilUserService utilUser) {
+    public UserRoleService(RoleRepository roleRepository, UserRoleRepository userRoleRepository, UtilUserService utilUser) {
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
         this.utilUser = utilUser;
     }
+
 
     public UserRole createUserRole(String userMail, String roleCode) {
         User user = utilUser.finUserMail(userMail);

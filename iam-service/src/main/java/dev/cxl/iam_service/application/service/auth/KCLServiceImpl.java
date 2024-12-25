@@ -16,8 +16,8 @@ import dev.cxl.iam_service.application.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.application.dto.request.ResetPassword;
 import dev.cxl.iam_service.application.dto.request.UserCreationRequest;
 import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
-import dev.cxl.iam_service.domain.entity.User;
-import dev.cxl.iam_service.infrastructure.respository.UserRespository;
+import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
 
 
 @Service
@@ -27,7 +27,7 @@ public class KCLServiceImpl implements IAuthService {
 
     private final UserKCLService userKCLService;
 
-    private final UserRespository userRespository;
+    private final JpaUserRepository userRespository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -36,7 +36,7 @@ public class KCLServiceImpl implements IAuthService {
     public KCLServiceImpl(
             UserService userService,
             UserKCLService userKCLService,
-            UserRespository userRespository,
+            JpaUserRepository userRespository,
             PasswordEncoder passwordEncoder,
             UtilUserService utilUser) {
         this.userService = userService;

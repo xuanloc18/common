@@ -12,7 +12,7 @@ import com.evo.common.exception.ErrorCode;
 
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequestTwo;
-import dev.cxl.iam_service.domain.entity.User;
+import dev.cxl.iam_service.infrastructure.entity.User;
 
 @Service
 public class TwoFactorAuthService {
