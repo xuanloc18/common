@@ -5,6 +5,13 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.*;
+
+import com.evo.common.UserAuthority;
+import com.evo.common.dto.response.BasedResponse;
+import com.evo.common.webapp.security.AuthorityService;
+import com.nimbusds.jose.JOSEException;
+
 import dev.cxl.iam_service.application.configuration.IdpConfig;
 import dev.cxl.iam_service.application.configuration.KeyProvider;
 import dev.cxl.iam_service.application.dto.identity.TokenExchangeResponseUser;
@@ -16,15 +23,7 @@ import dev.cxl.iam_service.application.dto.response.APIResponse;
 import dev.cxl.iam_service.application.dto.response.AuthenticationResponse;
 import dev.cxl.iam_service.application.dto.response.DefaultClientTokenResponse;
 import dev.cxl.iam_service.application.dto.response.IntrospectResponse;
-import org.springframework.web.bind.annotation.*;
-
-import com.evo.common.UserAuthority;
-import com.evo.common.dto.response.BasedResponse;
-import com.evo.common.webapp.security.AuthorityService;
-import com.nimbusds.jose.JOSEException;
-
 import dev.cxl.iam_service.application.service.AuthenticationService;
-import dev.cxl.iam_service.application.service.ClientsService;
 import dev.cxl.iam_service.application.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +44,6 @@ public class AuthenticationController {
     private final KeyProvider keyProvider;
 
     private final AuthorityService authorityService;
-
 
     @PostMapping("/login")
     public APIResponse<Object> login(@RequestBody AuthenticationRequest authenticationRequest) throws IOException {
@@ -78,7 +76,7 @@ public class AuthenticationController {
 
     @PostMapping("/send-email")
     APIResponse<String> sendemail(@RequestParam("email") String email) {
-        userService.sendtoken(email);
+        userService.sendToken(email);
         return APIResponse.<String>builder().result("Chuc ban thanh cong").build();
     }
 
@@ -86,7 +84,7 @@ public class AuthenticationController {
     APIResponse<Boolean> forgotPass(@RequestBody ForgotPassWord forgotPassWord) throws ParseException, JOSEException {
 
         return APIResponse.<Boolean>builder()
-                .result(userService.checkotp(forgotPassWord))
+                .result(userService.check(forgotPassWord))
                 .build();
     }
 

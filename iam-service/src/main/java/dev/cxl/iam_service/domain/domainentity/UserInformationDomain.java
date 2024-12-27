@@ -1,15 +1,14 @@
 package dev.cxl.iam_service.domain.domainentity;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class UserInformationDomain extends AuditableEntityDomain {
     private String username;
     private String fullName;

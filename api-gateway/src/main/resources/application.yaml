@@ -1,35 +1,57 @@
-server:
-  port: 8888
-
 spring:
   application:
     name: api-gateway
   cloud:
-    loadbalancer:
-      ribbon:
-        enabled: true
     gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 5000 # Thời gian chờ phản hồi (ms)
+      discovery:
+        locator:
+          enabled: true
       routes:
-        - id: iam-service
-#          uri: lb://iam
-          uri: http://192.168.94.65:8088
+        - id: fallback
+          uri: forward:/fallback
+          predicates:
+            - Path=/fallback
+        - id: iam
+          uri: lb://IAM
           predicates:
             - Path=/iam/**
-        - id: storage-service
-#          uri: lb://storage
-          uri: http://192.168.94.65:8099
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: iamCircuitBreaker
+                fallbackUri: forward:/fallback/iam
+        #            - StripPrefix=1
+        #            - name: Retry
+        #              args:
+        #                retries: 3
+        #                statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
+        #                methods: GET, POST
+        - id: storage
+          uri: lb://STORAGE
           predicates:
             - Path=/storage/**
-      eureka:
-        client:
-          service-url:
-            defaultZone: http://localhost:8761/eureka/
-    discovery:
-      client:
-        simple:
-          registration-enabled: true
-  swagger-ui:
-    enabled: true
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: storageCircuitBreaker
+                fallbackUri: forward:/fallback/storage
+#            - StripPrefix=1
+#            - name: Retry
+#              args:
+#                retries: 3
+#                statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
+#                methods: GET,POST
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
 springdoc:
   api-docs:
     enabled: true
@@ -38,18 +60,48 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
     urls:
-      - name: API Gateway Service
-        url: /v3/api-docs/gateway-api
-      - name: IAM Service
+      - name: iam
         url: /iam/iam-swagger/v3/api-docs
-      - name: Storage Service
+      - name: storage_service
         url: /storage/storage-swagger/v3/api-docs
+
+server:
+  port: 8888
 
 logging:
   level:
-    org.springframework.cloud.netflix.eureka: DEBUG
-    org.springframework.cloud.client.loadbalancer: DEBUG
     org.springframework.cloud.gateway: DEBUG
+    io.github.resilience4j: DEBUG
+    org.springframework.cloud.gateway.filter.factory.RetryGatewayFilterFactory: DEBUG
 
+resilience4j:
+  circuitbreaker:
+    instances:
+      iamCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 20
+        recordExceptions:
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - org.springframework.cloud.gateway.support.NotFoundException
 
-
+      storageCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 20
+  timeout:
+    instances:
+      default:
+        timeoutDuration: 5000ms
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s
+        cancel-running-future: false

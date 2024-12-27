@@ -1,11 +1,12 @@
 package dev.cxl.iam_service.infrastructure.respository.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import dev.cxl.iam_service.domain.repository.UserInformationRepository;
 import dev.cxl.iam_service.infrastructure.entity.UserInformation;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserInformationRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class UserInformationRepositoryImpl implements UserInformationRepository {
@@ -32,6 +33,6 @@ public class UserInformationRepositoryImpl implements UserInformationRepository 
 
     @Override
     public List<UserInformation> saveAll(List<UserInformation> userInformation) {
-        return  jpaUserInformationRepository.saveAll(userInformation);
+        return jpaUserInformationRepository.saveAll(userInformation);
     }
 }

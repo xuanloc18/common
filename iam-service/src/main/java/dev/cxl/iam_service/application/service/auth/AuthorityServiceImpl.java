@@ -3,17 +3,16 @@ package dev.cxl.iam_service.application.service.auth;
 import java.util.List;
 import java.util.UUID;
 
-import dev.cxl.iam_service.domain.repository.PermissionRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.evo.common.UserAuthority;
 import com.evo.common.webapp.security.AuthorityService;
 
+import dev.cxl.iam_service.application.service.UtilUserService;
+import dev.cxl.iam_service.domain.repository.PermissionRepository;
 import dev.cxl.iam_service.infrastructure.entity.Permission;
 import dev.cxl.iam_service.infrastructure.entity.User;
-import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
-import dev.cxl.iam_service.application.service.UtilUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,6 +1,7 @@
 package dev.cxl.iam_service.application.dto.request;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -27,5 +28,6 @@ public class UserCreationRequest {
     String lastName;
     LocalDate dateOfBirth;
     String avatar;
-    Boolean deleted = false;
+    Boolean deleted;
+    List<String> rolesId;
 }

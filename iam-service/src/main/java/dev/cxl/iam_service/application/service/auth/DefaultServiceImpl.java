@@ -2,7 +2,6 @@ package dev.cxl.iam_service.application.service.auth;
 
 import java.text.ParseException;
 
-import dev.cxl.iam_service.application.service.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +12,11 @@ import dev.cxl.iam_service.application.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.application.dto.request.ResetPassword;
 import dev.cxl.iam_service.application.dto.request.UserCreationRequest;
 import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
+import dev.cxl.iam_service.application.mapper.UserMapper;
+import dev.cxl.iam_service.application.service.*;
+import dev.cxl.iam_service.domain.domainentity.UserDomain;
 import dev.cxl.iam_service.infrastructure.entity.User;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
-
 
 @Service
 public class DefaultServiceImpl implements IAuthService {
@@ -34,21 +35,25 @@ public class DefaultServiceImpl implements IAuthService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final UserMapper userMapper;
+
     public DefaultServiceImpl(
             AuthenticationService authenticationService,
             TwoFactorAuthService twoFactorAuthService,
             UserService userService,
-            JpaUserRepository userRespository,
+            JpaUserRepository userRepository,
             UserKCLService userKCLService,
             UtilUserService utilUser,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            UserMapper userMapper) {
         this.authenticationService = authenticationService;
         this.twoFactorAuthService = twoFactorAuthService;
         this.userService = userService;
-        this.userRepository = userRespository;
+        this.userRepository = userRepository;
         this.userKCLService = userKCLService;
         this.utilUser = utilUser;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -86,8 +91,9 @@ public class DefaultServiceImpl implements IAuthService {
 
     public Boolean delete(String id) {
         User user = utilUser.finUserId(id);
-        user.setDeleted(true);
-        userRepository.save(user);
+        UserDomain userDomain = userMapper.toUserDomain(user);
+        userDomain.deleted();
+        userRepository.save(userMapper.toUser(userDomain));
         return true;
     }
 

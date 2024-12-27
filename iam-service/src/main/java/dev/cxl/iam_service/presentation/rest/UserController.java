@@ -3,7 +3,6 @@ package dev.cxl.iam_service.presentation.rest;
 import java.text.ParseException;
 import java.util.List;
 
-import dev.cxl.iam_service.application.dto.request.*;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -12,13 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.cxl.iam_service.application.configuration.IdpConfig;
+import dev.cxl.iam_service.application.dto.request.*;
 import dev.cxl.iam_service.application.dto.response.APIResponse;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
-import dev.cxl.iam_service.infrastructure.entity.User;
-import dev.cxl.iam_service.infrastructure.respository.custom.UserRepositoryCustom;
 import dev.cxl.iam_service.application.service.UserService;
 import dev.cxl.iam_service.application.service.auth.DefaultServiceImpl;
+import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.respository.custom.UserRepositoryCustom;
 
 @RestController
 @RequestMapping("/users")
@@ -88,7 +88,7 @@ public class UserController {
     @GetMapping("/myInfor")
     APIResponse<UserResponse> getUser() {
         return APIResponse.<UserResponse>builder()
-                .result(userService.getMyInfor())
+                .result(userService.getMyInfo())
                 .build();
     }
 
@@ -96,7 +96,7 @@ public class UserController {
     @GetMapping("/{userID}/infor")
     APIResponse<UserResponse> getinforUser(@PathVariable String userID) {
         return APIResponse.<UserResponse>builder()
-                .result(userService.getInfor(userID))
+                .result(userService.getInfo(userID))
                 .build();
     }
 
@@ -119,7 +119,7 @@ public class UserController {
 
     @PutMapping({"/updateInfor"})
     UserResponse updateUser(@RequestBody UserUpdateRequest request) {
-        return userService.updareUser(request);
+        return userService.updateUser(request);
     }
 
     @PreAuthorize("hasPermission('USER_DATA','VIEW')")

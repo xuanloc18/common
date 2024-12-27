@@ -1,11 +1,11 @@
 package dev.cxl.iam_service.domain.domainentity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Builder
 @Data
@@ -16,6 +16,7 @@ public class HistoryActivityDomain {
 
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+
     String userID;
     String activityType;
     String activityName;

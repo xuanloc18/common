@@ -21,6 +21,7 @@ public class FeignClientInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate requestTemplate) {
         String token = getClientToken();
+        log.info("token: {}", token);
         if (token != null && !token.isEmpty()) {
             requestTemplate.header("Authorization", "Bearer " + token);
         }

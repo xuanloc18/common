@@ -1,13 +1,16 @@
 package dev.cxl.iam_service.infrastructure.respository.impl;
 
-import dev.cxl.iam_service.domain.repository.RoleRepository;
-import dev.cxl.iam_service.infrastructure.entity.Role;
-import dev.cxl.iam_service.infrastructure.persistent.JpaRoleRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import dev.cxl.iam_service.domain.repository.RoleRepository;
+import dev.cxl.iam_service.infrastructure.entity.Role;
+import dev.cxl.iam_service.infrastructure.persistent.JpaRoleRepository;
+
 @Component
 public class RoleRepositoryImpl implements RoleRepository {
     private final JpaRoleRepository jpaRoleRepository;
@@ -29,6 +32,11 @@ public class RoleRepositoryImpl implements RoleRepository {
     @Override
     public Page<Role> findAll(Pageable pageable) {
         return jpaRoleRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Role> findAll(List<String> strings) {
+        return jpaRoleRepository.findAllById(strings);
     }
 
     @Override

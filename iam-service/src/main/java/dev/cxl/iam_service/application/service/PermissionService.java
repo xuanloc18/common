@@ -1,6 +1,5 @@
 package dev.cxl.iam_service.application.service;
 
-import dev.cxl.iam_service.domain.repository.PermissionRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,9 +10,10 @@ import com.evo.common.exception.ErrorCode;
 import dev.cxl.iam_service.application.dto.request.PermissionRequest;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.PermissionResponse;
-import dev.cxl.iam_service.infrastructure.entity.Permission;
 import dev.cxl.iam_service.application.mapper.PermissionMapper;
-import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
+import dev.cxl.iam_service.domain.domainentity.PermissionDomain;
+import dev.cxl.iam_service.domain.repository.PermissionRepository;
+import dev.cxl.iam_service.infrastructure.entity.Permission;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,8 +31,8 @@ public class PermissionService {
         Boolean check =
                 permissionRespository.existsByResourceCodeAndScope(request.getResourceCode(), request.getScope());
         if (check) throw new AppException(ErrorCode.PERMISSION_EXISTED);
-        Permission permission = permissionMapper.toPermission(request);
-        permission.setDeleted(false);
+        PermissionDomain permissionDomain = new PermissionDomain(request);
+        Permission permission = permissionMapper.toPermission(permissionDomain);
         return permissionMapper.toPermissionResponse(permissionRespository.save(permission));
     }
 
@@ -45,7 +45,7 @@ public class PermissionService {
                 .totalElements(data.getTotalElements())
                 .totalPages(data.getTotalPages())
                 .data(data.getContent().stream()
-                        .map(permission -> permissionMapper.toPermissionResponse(permission))
+                        .map(permissionMapper::toPermissionResponse)
                         .toList())
                 .build();
     }
@@ -54,7 +54,8 @@ public class PermissionService {
         Permission permission = permissionRespository
                 .findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_EXISTED));
-        permission.setDeleted(true);
-        permissionRespository.save(permission);
+        PermissionDomain permissionDomain = permissionMapper.toPermissionDomain(permission);
+        permissionDomain.delete();
+        permissionRespository.save(permissionMapper.toPermission(permissionDomain));
     }
 }

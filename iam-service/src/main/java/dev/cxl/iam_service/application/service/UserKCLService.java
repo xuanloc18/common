@@ -2,13 +2,13 @@ package dev.cxl.iam_service.application.service;
 
 import java.util.List;
 
-import dev.cxl.iam_service.application.dto.identity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import dev.cxl.iam_service.application.dto.identity.*;
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.application.dto.request.ResetPassword;
 import dev.cxl.iam_service.application.dto.request.UserCreationRequest;
@@ -31,11 +31,8 @@ public class UserKCLService {
     @NonFinal
     String idpClientSecret;
 
-    private final UtilUserService utilUser;
-
     public UserKCLService(IndentityClient indentityClient, UtilUserService utilUser) {
         this.indentityClient = indentityClient;
-        this.utilUser = utilUser;
     }
 
     public String createUserKCL(UserCreationRequest request) {

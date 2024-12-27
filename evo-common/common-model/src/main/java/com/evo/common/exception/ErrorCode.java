@@ -32,11 +32,11 @@ public enum ErrorCode {
     FILE_DELETE(1019, "file deleted", HttpStatus.BAD_REQUEST),
     FILE_EXIST(1019, "file exist", HttpStatus.BAD_REQUEST),
     FILE_NOT_EXIST(1019, "file not exist", HttpStatus.BAD_REQUEST),
-    FILE_PRIVATE(1019, "file private", HttpStatus.BAD_REQUEST),
-    INVALID_FILE_TYPE(1019, "invalid", HttpStatus.BAD_REQUEST),
-    CLIENT_NOT_EXITS(1019, "invalid", HttpStatus.BAD_REQUEST),
-    CLIENT_FAILED(1019, "failed", HttpStatus.BAD_REQUEST),
-    FILE_PUBLIC(1019, "file public", HttpStatus.BAD_REQUEST);
+    FILE_PRIVATE(1020, "file private", HttpStatus.BAD_REQUEST),
+    INVALID_FILE_TYPE(1021, "file invalid", HttpStatus.BAD_REQUEST),
+    CLIENT_NOT_EXITS(1022, "client not exit", HttpStatus.BAD_REQUEST),
+    CLIENT_FAILED(1023, "client falid", HttpStatus.BAD_REQUEST),
+    FILE_PUBLIC(1024, "file public", HttpStatus.BAD_REQUEST);
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

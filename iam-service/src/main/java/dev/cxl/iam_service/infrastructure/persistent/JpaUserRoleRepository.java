@@ -10,4 +10,6 @@ import dev.cxl.iam_service.infrastructure.entity.UserRole;
 @Repository
 public interface JpaUserRoleRepository extends JpaRepository<UserRole, String> {
     List<UserRole> findByUserID(String userId);
+
+    boolean existsUserRoleByUserIDAndRoleID(String userId, String roleId);
 }

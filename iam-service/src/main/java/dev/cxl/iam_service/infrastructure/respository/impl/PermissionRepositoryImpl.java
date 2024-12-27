@@ -1,14 +1,15 @@
 package dev.cxl.iam_service.infrastructure.respository.impl;
 
-import dev.cxl.iam_service.domain.repository.PermissionRepository;
-import dev.cxl.iam_service.infrastructure.entity.Permission;
-import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
+import dev.cxl.iam_service.domain.repository.PermissionRepository;
+import dev.cxl.iam_service.infrastructure.entity.Permission;
+import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
 
 @Component
 public class PermissionRepositoryImpl implements PermissionRepository {

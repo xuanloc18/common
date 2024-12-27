@@ -1,9 +1,10 @@
 package dev.cxl.iam_service.infrastructure.respository.impl;
 
+import org.springframework.stereotype.Component;
+
 import dev.cxl.iam_service.domain.repository.HistoryActivityRepository;
 import dev.cxl.iam_service.infrastructure.entity.HistoryActivity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaHistoryActivityRepository;
-import org.springframework.stereotype.Component;
 
 @Component
 public class HistoryActivityRepositoryImpl implements HistoryActivityRepository {
@@ -12,7 +13,8 @@ public class HistoryActivityRepositoryImpl implements HistoryActivityRepository 
     public HistoryActivityRepositoryImpl(JpaHistoryActivityRepository repository) {
         this.repository = repository;
     }
+
     public HistoryActivity save(HistoryActivity activity) {
-       return repository.save(activity);
+        return repository.save(activity);
     }
 }

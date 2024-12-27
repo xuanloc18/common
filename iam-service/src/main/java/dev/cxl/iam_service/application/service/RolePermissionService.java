@@ -1,19 +1,18 @@
 package dev.cxl.iam_service.application.service;
 
-import dev.cxl.iam_service.domain.repository.PermissionRepository;
-import dev.cxl.iam_service.domain.repository.RolePermissionRepository;
-import dev.cxl.iam_service.domain.repository.RoleRepository;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
+import dev.cxl.iam_service.domain.repository.PermissionRepository;
+import dev.cxl.iam_service.domain.repository.RolePermissionRepository;
+import dev.cxl.iam_service.domain.repository.RoleRepository;
 import dev.cxl.iam_service.infrastructure.entity.Permission;
 import dev.cxl.iam_service.infrastructure.entity.Role;
 import dev.cxl.iam_service.infrastructure.entity.RolePermission;
-import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
-import dev.cxl.iam_service.infrastructure.persistent.JpaRolePermissionRepository;
-import dev.cxl.iam_service.infrastructure.persistent.JpaRoleRepository;
 
 @Service
 public class RolePermissionService {
@@ -24,12 +23,14 @@ public class RolePermissionService {
 
     private final RolePermissionRepository rolePermissionRepository;
 
-    public RolePermissionService(RoleRepository roleRepository, PermissionRepository permissionRepository, RolePermissionRepository rolePermissionRepository) {
+    public RolePermissionService(
+            RoleRepository roleRepository,
+            PermissionRepository permissionRepository,
+            RolePermissionRepository rolePermissionRepository) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.rolePermissionRepository = rolePermissionRepository;
     }
-
 
     public RolePermission create(String roleCode, String perRe, String perCode) {
         Role role = roleRepository.findByCode(roleCode).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
@@ -47,6 +48,10 @@ public class RolePermissionService {
                 .permissionId(permission.getId())
                 .deleted(false)
                 .build());
+    }
+
+    public void saveAll(List<RolePermission> rolePermissions) {
+        rolePermissionRepository.saveAll(rolePermissions);
     }
 
     public boolean delete(String id) {

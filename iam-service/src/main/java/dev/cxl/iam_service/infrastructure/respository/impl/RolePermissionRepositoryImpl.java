@@ -1,12 +1,13 @@
 package dev.cxl.iam_service.infrastructure.respository.impl;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
 import dev.cxl.iam_service.domain.repository.RolePermissionRepository;
 import dev.cxl.iam_service.infrastructure.entity.RolePermission;
 import dev.cxl.iam_service.infrastructure.persistent.JpaRolePermissionRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
 
 @Component
 public class RolePermissionRepositoryImpl implements RolePermissionRepository {
@@ -16,11 +17,11 @@ public class RolePermissionRepositoryImpl implements RolePermissionRepository {
         this.rolePermissionRepository = rolePermissionRepository;
     }
 
-
     @Override
     public RolePermission save(RolePermission rolePermission) {
         return rolePermissionRepository.save(rolePermission);
     }
+
     @Override
     public List<RolePermission> findByRoleId(String id) {
         return rolePermissionRepository.findByRoleId(id);
@@ -31,5 +32,8 @@ public class RolePermissionRepositoryImpl implements RolePermissionRepository {
         return rolePermissionRepository.findById(id);
     }
 
-
+    @Override
+    public List<RolePermission> saveAll(List<RolePermission> rolePermissions) {
+        return rolePermissionRepository.saveAll(rolePermissions);
+    }
 }

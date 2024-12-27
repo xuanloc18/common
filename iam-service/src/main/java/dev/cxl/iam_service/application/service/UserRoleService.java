@@ -1,17 +1,22 @@
 package dev.cxl.iam_service.application.service;
 
-import dev.cxl.iam_service.domain.repository.RoleRepository;
-import dev.cxl.iam_service.domain.repository.UserRoleRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
+
+import dev.cxl.iam_service.application.mapper.UserRoleMapper;
+import dev.cxl.iam_service.domain.domainentity.UserDomain;
+import dev.cxl.iam_service.domain.domainentity.UserRoleDomain;
+import dev.cxl.iam_service.domain.repository.RoleRepository;
+import dev.cxl.iam_service.domain.repository.UserRoleRepository;
 import dev.cxl.iam_service.infrastructure.entity.Role;
 import dev.cxl.iam_service.infrastructure.entity.User;
 import dev.cxl.iam_service.infrastructure.entity.UserRole;
-import dev.cxl.iam_service.infrastructure.persistent.JpaRoleRepository;
-import dev.cxl.iam_service.infrastructure.persistent.JpaUserRoleRepository;
 
 @Service
 public class UserRoleService {
@@ -22,36 +27,56 @@ public class UserRoleService {
 
     private final UtilUserService utilUser;
 
-    public UserRoleService(RoleRepository roleRepository, UserRoleRepository userRoleRepository, UtilUserService utilUser) {
+    private final UserRoleMapper userRoleMapper;
+
+    public UserRoleService(
+            RoleRepository roleRepository,
+            UserRoleRepository userRoleRepository,
+            UtilUserService utilUser,
+            UserRoleMapper userRoleMapper) {
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
         this.utilUser = utilUser;
+        this.userRoleMapper = userRoleMapper;
     }
 
-
-    public UserRole createUserRole(String userMail, String roleCode) {
+    public List<UserRole> createUserRole(String userMail, String roleCode) {
         User user = utilUser.finUserMail(userMail);
         Role role = roleRepository.findByCode(roleCode).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         if (role.getDeleted()) {
             throw new AppException(ErrorCode.ROLE_DELETE);
         }
-        Boolean check = userRoleRepository.findByUserID(user.getUserID()).stream()
+        boolean check = userRoleRepository.findByUserID(user.getUserID()).stream()
                 .anyMatch(userRole -> userRole.getRoleID().equals(role.getId()));
-
         if (check) throw new AppException(ErrorCode.USER_HAD_ROLE);
-
-        return userRoleRepository.save(UserRole.builder()
-                .userID(user.getUserID())
+        UserDomain userDomain = utilUser.getUserDomain(user.getUserID());
+        userDomain.addUserRole(UserRoleDomain.builder()
                 .roleID(role.getId())
-                .deleted(false)
+                .userID(userDomain.getUserID())
                 .build());
+       return saveUserRoles(userRoleMapper.toUserRoles(userDomain.getUserRoles()));
+    }
+
+    public void saveAllUserRoles(List<UserRoleDomain> userRoleDomains) {
+        userRoleRepository.saveAll(userRoleMapper.toUserRoles(userRoleDomains));
     }
 
     public Boolean delete(String id) {
-        UserRole role =
+        UserRole userRole =
                 userRoleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_ROLE_NOT_EXISTED));
-        role.setDeleted(true);
-        userRoleRepository.save(role);
+        UserDomain userDomain = utilUser.getUserDomain(userRole.getUserID());
+        userDomain.deleteUserRoles(userRole.getId());
+        userRole.setDeleted(true);
+        userRoleRepository.save(userRole);
         return true;
     }
+
+    //Check userRole not exits for add
+    public List<UserRole> saveUserRoles(List<UserRole> userRoles) {
+        List<UserRole> nonDuplicateRoles = userRoles.stream()
+                .filter(userRole -> !userRoleRepository.existsByUserIdAndRoleId(userRole.getUserID(), userRole.getRoleID()))
+                .collect(Collectors.toList());
+        return  userRoleRepository.saveAll(nonDuplicateRoles);
+    }
+
 }

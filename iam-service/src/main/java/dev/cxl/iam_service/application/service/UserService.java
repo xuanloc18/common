@@ -3,9 +3,6 @@ package dev.cxl.iam_service.application.service;
 import java.text.ParseException;
 import java.util.*;
 
-import dev.cxl.iam_service.application.dto.request.*;
-import dev.cxl.iam_service.domain.domainentity.UserDomain;
-import dev.cxl.iam_service.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,11 +25,15 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 
 import dev.cxl.iam_service.application.configuration.SecurityUtils;
+import dev.cxl.iam_service.application.dto.request.*;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
-import dev.cxl.iam_service.infrastructure.entity.User;
-import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.application.mapper.UserMapper;
+import dev.cxl.iam_service.application.mapper.UserRoleMapper;
+import dev.cxl.iam_service.domain.domainentity.UserDomain;
+import dev.cxl.iam_service.domain.enums.UserAction;
+import dev.cxl.iam_service.domain.repository.UserRepository;
+import dev.cxl.iam_service.infrastructure.entity.User;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
@@ -61,6 +62,11 @@ public class UserService {
 
     private final StorageClient client;
 
+    private final UserRoleService userRoleService;
+
+    private final UserRoleMapper userRoleMapper;
+
+    private final RoleService roleService;
 
     @Value("${idp.enable}")
     Boolean idpEnable;
@@ -68,8 +74,8 @@ public class UserService {
     private final TokenCacheService tokenService;
 
     public UserService(
-
-            UserRepository userRepository, UserMapper userMapper,
+            UserRepository userRepository,
+            UserMapper userMapper,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
             AuthenticationService authenticationService,
@@ -78,6 +84,9 @@ public class UserService {
             UserKCLService userKCLService,
             UtilUserService utilUser,
             StorageClient client,
+            UserRoleService userRoleService1,
+            UserRoleMapper userRoleMapper,
+            RoleService roleService,
             TokenCacheService tokenService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
@@ -89,31 +98,42 @@ public class UserService {
         this.userKCLService = userKCLService;
         this.utilUser = utilUser;
         this.client = client;
+        this.userRoleService = userRoleService1;
+        this.userRoleMapper = userRoleMapper;
+        this.roleService = roleService;
         this.tokenService = tokenService;
     }
 
-    public UserResponse createUser(UserCreationRequest request) {
+    public void createUser(UserCreationRequest request) {
         if (userRepository.existsByUserMail(request.getUserMail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        UserDomain userDomain= new UserDomain().create(request);
+        List<String> listRolesExits = roleService.listRolesExit(request.getRolesId());
+        UserDomain userDomain =
+                new UserDomain(request, passwordEncoder, () -> userKCLService.createUserKCL(request), listRolesExits);
+
         User user = userMapper.toUser(userDomain);
-        user.setUserKCLID(userKCLService.createUserKCL(request));
-        user.setPassWord(passwordEncoder.encode(request.getPassWord()));
+        // Save userRole
+        if (request.getRolesId() != null && !request.getRolesId().isEmpty()) {
+            userRoleService.saveAllUserRoles(userDomain.getUserRoles());
+        }
         twoFactorAuthService.sendCreatUser(user.getUserMail());
-        return userMapper.toUserResponse(userRepository.save(user));
+        userRepository.save(user);
     }
 
-    public UserResponse confirmCreateUser(String email, String otp) {
+    public void confirmCreateUser(String email, String otp) {
         User user = utilUser.finUserMail(email);
         Boolean check = twoFactorAuthService.validateOtp(
                 AuthenticationRequestTwo.builder().userMail(email).otp(otp).build());
         if (!check) {
             throw new AppException(ErrorCode.INVALID_OTP);
+
+
         }
-        user.setEnabled(true);
-        activityService.createHistoryActivity(user.getUserID(), UserAction.CREATE);
-        return userMapper.toUserResponse(userRepository.save(user));
+        UserDomain userDomain = userMapper.toUserDomain(user);
+        userDomain.enabled();
+        activityService.createHistoryActivity(userDomain.getUserID(), UserAction.CREATE);
+        userRepository.save(userMapper.toUser(userDomain));
     }
 
     public PageResponse<UserResponse> getAllUsers(int page, int size) {
@@ -126,12 +146,12 @@ public class UserService {
                 .totalPages(pageData.getTotalPages())
                 .totalElements(pageData.getTotalElements())
                 .data(pageData.getContent().stream()
-                        .map(user -> userMapper.toUserResponse(user))
+                        .map(userMapper::toUserResponse)
                         .toList())
                 .build();
     }
 
-    public UserResponse updareUser(UserUpdateRequest request) {
+    public UserResponse updateUser(UserUpdateRequest request) {
         String userID = SecurityUtils.getAuthenticatedUserID();
         User user = utilUser.finUserId(userID);
         UserDomain userDomain = userMapper.toUserDomain(user);
@@ -142,7 +162,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    public UserResponse getMyInfor() {
+    public UserResponse getMyInfo() {
         String id = SecurityUtils.getAuthenticatedUserID();
         User user;
         if (idpEnable) {
@@ -153,7 +173,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public UserResponse getInfor(String id) {
+    public UserResponse getInfo(String id) {
         User user;
         if (idpEnable) {
             user = utilUser.finUserKCLId(id);
@@ -164,45 +184,45 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public Boolean replacePassword(UserRepalcePass userRepalcePass) {
+    public void replacePassword(UserRepalcePass userRepalcePass) {
         String id = SecurityUtils.getAuthenticatedUserID();
         User user = utilUser.finUserId(id);
-        UserDomain userDomain =userMapper.toUserDomain(user);
-        userDomain.changePassword(userRepalcePass,passwordEncoder);
+        UserDomain userDomain = userMapper.toUserDomain(user);
+        userDomain.changePassword(userRepalcePass, passwordEncoder);
         User user2 = userMapper.toUser(userDomain);
         // Save history activity
         activityService.createHistoryActivity(user.getUserID(), UserAction.CHANGE_PASSWORD);
         userRepository.save(user2);
-        return true;
     }
 
     public Boolean createProfile(MultipartFile file) {
         String id = SecurityUtils.getAuthenticatedUserID();
         User user = utilUser.finUserId(id);
+        UserDomain userDomain = userMapper.toUserDomain(user);
         APIResponse<String> apiResponse = client.createProfile(file, SecurityUtils.getAuthenticatedUserID());
-        user.setProfile(apiResponse.getResult());
-        userRepository.save(user);
+        userDomain.createProfile(apiResponse.getResult());
+        userRepository.save(userMapper.toUser(userDomain));
         return true;
     }
 
     public ResponseEntity<Resource> viewProfile() {
         String userID = SecurityUtils.getAuthenticatedUserID();
         User user = utilUser.finUserId(userID);
-        ResponseEntity<Resource> response = client.downloadFile(user.getProfile());
+        UserDomain userDomain = userMapper.toUserDomain(user);
+        ResponseEntity<Resource> response = client.downloadFile(userDomain.getProfile());
         return ResponseEntity.ok().headers(response.getHeaders()).body(response.getBody());
     }
 
-    public String sendtoken(String email) {
+    public void sendToken(String email) {
         utilUser.finUserMail(email);
         String token = authenticationService.generateToken(email);
         emailService.SendEmail(email, token);
-        return "Chúc bạn thành công";
     }
 
-    public Boolean checkotp(ForgotPassWord forgotPassWord) throws ParseException, JOSEException {
-        var respone = authenticationService.introspect(
+    public Boolean check(ForgotPassWord forgotPassWord) throws ParseException, JOSEException {
+        var response = authenticationService.introspect(
                 IntrospectRequest.builder().token(forgotPassWord.getToken()).build());
-        if (!respone.isValid()) {
+        if (!response.isValid()) {
             return false;
         }
         SignedJWT signedJWT = SignedJWT.parse(forgotPassWord.getToken());
@@ -220,9 +240,7 @@ public class UserService {
     public List<UserResponse> findUserByKey(String keyKey, int page, int size, Object attribute, String key) {
         Pageable pageable = PageRequest.of(page - 1, size, sort(attribute, key));
         Page<User> user = userRepository.findUsersByKey(keyKey, pageable);
-        return user.getContent().stream()
-                .map(user1 -> userMapper.toUserResponse(user1))
-                .toList();
+        return user.getContent().stream().map(userMapper::toUserResponse).toList();
     }
 
     public Sort sort(Object attribute, String key) {

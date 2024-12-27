@@ -2,12 +2,12 @@ package dev.cxl.iam_service.application.service;
 
 import java.io.IOException;
 
-import dev.cxl.iam_service.domain.repository.UserRepository;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import dev.cxl.iam_service.domain.repository.UserRepository;
 import dev.cxl.iam_service.infrastructure.entity.User;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
 

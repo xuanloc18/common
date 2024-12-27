@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
 
-import dev.cxl.iam_service.infrastructure.entity.HistoryActivity;
 import dev.cxl.iam_service.domain.enums.UserAction;
+import dev.cxl.iam_service.infrastructure.entity.HistoryActivity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaHistoryActivityRepository;
 
 @Service

@@ -3,8 +3,8 @@ package dev.cxl.iam_service.presentation.rest;
 import org.springframework.web.bind.annotation.*;
 
 import dev.cxl.iam_service.application.dto.response.APIResponse;
-import dev.cxl.iam_service.infrastructure.entity.RolePermission;
 import dev.cxl.iam_service.application.service.RolePermissionService;
+import dev.cxl.iam_service.infrastructure.entity.RolePermission;
 
 @RestController
 @RequestMapping("/role-permission")

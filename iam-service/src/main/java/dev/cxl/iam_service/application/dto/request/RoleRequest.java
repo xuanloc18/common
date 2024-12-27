@@ -1,5 +1,7 @@
 package dev.cxl.iam_service.application.dto.request;
 
+import java.util.List;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,4 +16,5 @@ public class RoleRequest {
     String code;
     String description;
     Boolean deleted = false;
+    List<String> permissions;
 }

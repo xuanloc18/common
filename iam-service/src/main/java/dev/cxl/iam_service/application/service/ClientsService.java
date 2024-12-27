@@ -1,13 +1,12 @@
 package dev.cxl.iam_service.application.service;
 
-import dev.cxl.iam_service.domain.repository.ClientsRepository;
 import org.springframework.stereotype.Service;
 
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
+import dev.cxl.iam_service.domain.repository.ClientsRepository;
 import dev.cxl.iam_service.infrastructure.entity.Clients;
-import dev.cxl.iam_service.infrastructure.persistent.JpaClientsRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service

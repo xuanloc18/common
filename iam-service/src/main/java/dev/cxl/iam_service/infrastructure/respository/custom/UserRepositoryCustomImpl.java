@@ -20,7 +20,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Override
     public List<User> search(UserSearchRequest request) {
         Map<String, Object> values = new HashMap<>();

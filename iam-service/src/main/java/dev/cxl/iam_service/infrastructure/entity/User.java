@@ -17,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 public class User extends AuditableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id") // Tên cột dạng snake_case
     String userID;
 
