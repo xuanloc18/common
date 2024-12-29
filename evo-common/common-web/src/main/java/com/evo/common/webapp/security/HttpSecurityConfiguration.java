@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
@@ -37,7 +38,7 @@ public class HttpSecurityConfiguration {
     private final ForbiddenTokenFilter forbiddenTokenFilter;
     private final JwtProperties jwtProperties;
     private final String[] SWAGGER_ENDPOINT = {
-            "/swagger-ui.html","/iam-swagger/**","/iam-swagger/**","/storage-swagger/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui/index.html","users/confirmCreateUser"
+            "/swagger-ui.html","/iam-swagger/**","/iam-swagger/**","/storage-swagger/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui/index.html","users/confirm"
     };
 
     @Bean
@@ -48,11 +49,12 @@ public class HttpSecurityConfiguration {
                         authorizeHttpRequests
                                 .requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/health").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/users").permitAll()
                                 .requestMatchers("/api/certificate/.well-known/jwks.json").permitAll()
                                 .requestMatchers("/api/public/**").permitAll()
                                 .requestMatchers("/api/authenticate/**").permitAll()
                                 .requestMatchers(SWAGGER_ENDPOINT).permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
 
                 );
                http.oauth2ResourceServer(oauth2 -> oauth2

@@ -3,14 +3,14 @@ package dev.cxl.iam_service.application.mapper;
 import org.mapstruct.Mapper;
 
 import dev.cxl.iam_service.application.dto.response.PermissionResponse;
-import dev.cxl.iam_service.domain.domainentity.PermissionDomain;
-import dev.cxl.iam_service.infrastructure.entity.Permission;
+import dev.cxl.iam_service.domain.domainentity.Permission;
+import dev.cxl.iam_service.infrastructure.entity.PermissionEntity;
 
 @Mapper(componentModel = "spring")
 public interface PermissionMapper {
-    Permission toPermission(PermissionDomain permissionDomain);
+    PermissionEntity toPermission(Permission permissionDomain);
 
-    PermissionDomain toPermissionDomain(Permission permission);
+    Permission toPermissionDomain(PermissionEntity permission);
 
-    PermissionResponse toPermissionResponse(Permission permission);
+    PermissionResponse toPermissionResponse(PermissionEntity permission);
 }

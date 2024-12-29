@@ -7,15 +7,15 @@ import dev.cxl.iam_service.application.dto.request.PermissionRequest;
 import dev.cxl.iam_service.application.dto.response.APIResponse;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.PermissionResponse;
-import dev.cxl.iam_service.application.service.PermissionService;
+import dev.cxl.iam_service.application.service.impl.PermissionServiceImpl;
 
 @RestController
 @RequestMapping("/permissions")
 public class PermissionController {
 
-    private final PermissionService permissionService;
+    private final PermissionServiceImpl permissionService;
 
-    public PermissionController(PermissionService permissionService) {
+    public PermissionController(PermissionServiceImpl permissionService) {
         this.permissionService = permissionService;
     }
 

@@ -5,12 +5,12 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import dev.cxl.iam_service.domain.repository.RolePermissionRepository;
-import dev.cxl.iam_service.infrastructure.entity.RolePermission;
+import dev.cxl.iam_service.domain.repository.RolePermissionRepositoryDomain;
+import dev.cxl.iam_service.infrastructure.entity.RolePermissionEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaRolePermissionRepository;
 
 @Component
-public class RolePermissionRepositoryImpl implements RolePermissionRepository {
+public class RolePermissionRepositoryImpl implements RolePermissionRepositoryDomain {
     private final JpaRolePermissionRepository rolePermissionRepository;
 
     public RolePermissionRepositoryImpl(JpaRolePermissionRepository rolePermissionRepository) {
@@ -18,22 +18,22 @@ public class RolePermissionRepositoryImpl implements RolePermissionRepository {
     }
 
     @Override
-    public RolePermission save(RolePermission rolePermission) {
+    public RolePermissionEntity save(RolePermissionEntity rolePermission) {
         return rolePermissionRepository.save(rolePermission);
     }
 
     @Override
-    public List<RolePermission> findByRoleId(String id) {
+    public List<RolePermissionEntity> findByRoleId(String id) {
         return rolePermissionRepository.findByRoleId(id);
     }
 
     @Override
-    public Optional<RolePermission> findById(String id) {
+    public Optional<RolePermissionEntity> findById(String id) {
         return rolePermissionRepository.findById(id);
     }
 
     @Override
-    public List<RolePermission> saveAll(List<RolePermission> rolePermissions) {
+    public List<RolePermissionEntity> saveAll(List<RolePermissionEntity> rolePermissions) {
         return rolePermissionRepository.saveAll(rolePermissions);
     }
 }

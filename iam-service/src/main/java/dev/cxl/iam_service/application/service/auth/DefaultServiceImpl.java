@@ -13,37 +13,37 @@ import dev.cxl.iam_service.application.dto.request.ResetPassword;
 import dev.cxl.iam_service.application.dto.request.UserCreationRequest;
 import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
 import dev.cxl.iam_service.application.mapper.UserMapper;
-import dev.cxl.iam_service.application.service.*;
-import dev.cxl.iam_service.domain.domainentity.UserDomain;
-import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.application.service.impl.*;
+import dev.cxl.iam_service.domain.domainentity.User;
+import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
 
 @Service
 public class DefaultServiceImpl implements IAuthService {
 
-    private final AuthenticationService authenticationService;
+    private final AuthenticationServiceImpl authenticationService;
 
-    private final TwoFactorAuthService twoFactorAuthService;
+    private final TwoFactorAuthServiceImpl twoFactorAuthService;
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     private final JpaUserRepository userRepository;
 
-    private final UserKCLService userKCLService;
+    private final UserKCLServiceImpl userKCLService;
 
-    private final UtilUserService utilUser;
+    private final UtilUserServiceImpl utilUser;
 
     private final PasswordEncoder passwordEncoder;
 
     private final UserMapper userMapper;
 
     public DefaultServiceImpl(
-            AuthenticationService authenticationService,
-            TwoFactorAuthService twoFactorAuthService,
-            UserService userService,
+            AuthenticationServiceImpl authenticationService,
+            TwoFactorAuthServiceImpl twoFactorAuthService,
+            UserServiceImpl userService,
             JpaUserRepository userRepository,
-            UserKCLService userKCLService,
-            UtilUserService utilUser,
+            UserKCLServiceImpl userKCLService,
+            UtilUserServiceImpl utilUser,
             PasswordEncoder passwordEncoder,
             UserMapper userMapper) {
         this.authenticationService = authenticationService;
@@ -81,7 +81,7 @@ public class DefaultServiceImpl implements IAuthService {
 
     @Override
     public Boolean enableUser(String token, String id, UserUpdateRequest request) throws ParseException {
-        User user = utilUser.finUserId(id);
+        UserEntity user = utilUser.finUserId(id);
         user.setEnabled(request.getEnabled());
         userRepository.save(user);
         userKCLService.enableUser(
@@ -90,8 +90,8 @@ public class DefaultServiceImpl implements IAuthService {
     }
 
     public Boolean delete(String id) {
-        User user = utilUser.finUserId(id);
-        UserDomain userDomain = userMapper.toUserDomain(user);
+        UserEntity user = utilUser.finUserId(id);
+        User userDomain = userMapper.toUserDomain(user);
         userDomain.deleted();
         userRepository.save(userMapper.toUser(userDomain));
         return true;
@@ -99,7 +99,7 @@ public class DefaultServiceImpl implements IAuthService {
 
     @Override
     public Boolean resetPassword(String token, String id, ResetPassword resetPassword) throws ParseException {
-        User user = utilUser.finUserId(id);
+        UserEntity user = utilUser.finUserId(id);
         user.setPassWord(passwordEncoder.encode(resetPassword.getValue()));
         userRepository.save(user);
         userKCLService.resetPassWord(

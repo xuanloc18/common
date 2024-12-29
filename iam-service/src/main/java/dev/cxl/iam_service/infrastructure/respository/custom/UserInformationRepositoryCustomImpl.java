@@ -11,18 +11,18 @@ import jakarta.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 
 import dev.cxl.iam_service.application.dto.request.UserInformationSearchRequest;
-import dev.cxl.iam_service.infrastructure.entity.UserInformation;
+import dev.cxl.iam_service.infrastructure.entity.UserInformationEntity;
 
 public class UserInformationRepositoryCustomImpl implements UserInformationRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public List<UserInformation> search(UserInformationSearchRequest request) {
+    public List<UserInformationEntity> search(UserInformationSearchRequest request) {
         Map<String, Object> values = new HashMap<>();
-        String sql = "select u from UserInformation u " + createWhereQuery(request, values)
+        String sql = "select u from UserInformationEntity u " + createWhereQuery(request, values)
                 + createOrderQuery(request.getSortBy());
-        Query query = entityManager.createQuery(sql, UserInformation.class);
+        Query query = entityManager.createQuery(sql, UserInformationEntity.class);
         values.forEach(query::setParameter);
         query.setFirstResult((request.getPageIndex() - 1) * request.getPageSize());
         query.setMaxResults(request.getPageSize());
@@ -32,7 +32,7 @@ public class UserInformationRepositoryCustomImpl implements UserInformationRepos
     @Override
     public Long count(UserInformationSearchRequest request) {
         Map<String, Object> values = new HashMap<>();
-        String sql = "select count(u) from UserInformation u " + createWhereQuery(request, values);
+        String sql = "select count(u) from UserInformationEntity u " + createWhereQuery(request, values);
         Query query = entityManager.createQuery(sql, Long.class);
         values.forEach(query::setParameter);
         return (Long) query.getSingleResult();

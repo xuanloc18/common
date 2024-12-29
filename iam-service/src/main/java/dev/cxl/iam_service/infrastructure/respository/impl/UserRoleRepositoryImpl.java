@@ -5,12 +5,12 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import dev.cxl.iam_service.domain.repository.UserRoleRepository;
-import dev.cxl.iam_service.infrastructure.entity.UserRole;
+import dev.cxl.iam_service.domain.repository.UserRoleRepositoryDomain;
+import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserRoleRepository;
 
 @Component
-public class UserRoleRepositoryImpl implements UserRoleRepository {
+public class UserRoleRepositoryImpl implements UserRoleRepositoryDomain {
     private final JpaUserRoleRepository userRoleRepository;
 
     public UserRoleRepositoryImpl(JpaUserRoleRepository userRoleRepository) {
@@ -18,27 +18,27 @@ public class UserRoleRepositoryImpl implements UserRoleRepository {
     }
 
     @Override
-    public Optional<UserRole> findById(String id) {
+    public Optional<UserRoleEntity> findById(String id) {
         return userRoleRepository.findById(id);
     }
 
     @Override
-    public List<UserRole> findByUserID(String userId) {
+    public List<UserRoleEntity> findByUserID(String userId) {
         return userRoleRepository.findByUserID(userId);
     }
 
     @Override
-    public UserRole save(UserRole userRole) {
+    public UserRoleEntity save(UserRoleEntity userRole) {
         return userRoleRepository.save(userRole);
     }
 
     @Override
-    public List<UserRole> saveAll(List<UserRole> userRoles) {
+    public List<UserRoleEntity> saveAll(List<UserRoleEntity> userRoles) {
         return userRoleRepository.saveAll(userRoles);
     }
 
     @Override
     public boolean existsByUserIdAndRoleId(String userId, String roleId) {
-        return userRoleRepository.existsUserRoleByUserIDAndRoleID(userId,roleId);
+        return userRoleRepository.existsUserRoleByUserIDAndRoleID(userId, roleId);
     }
 }

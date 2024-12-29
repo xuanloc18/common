@@ -3,10 +3,7 @@ package dev.cxl.iam_service.presentation.rest;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.cxl.iam_service.application.dto.response.APIResponse;
@@ -16,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("excel")
 public class ExcelController {
     private final ImportService importService;
     private final ExportService exportService;

@@ -17,27 +17,28 @@ import com.evo.common.dto.response.APIResponse;
 import com.evo.common.dto.response.FilesSearchRequest;
 
 import dev.cxl.iam_service.application.configuration.SecurityUtils;
-import dev.cxl.iam_service.application.service.UserKCLService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/storage")
 public class StorageController {
     private final StorageClient storageClient;
-    private final UserKCLService userKCLService;
 
-    @PostMapping("/public/files")
+    @PostMapping("/public")
     public APIResponse<String> createFiles(@RequestPart("file") List<MultipartFile> files) {
         String ownerID = SecurityUtils.getAuthenticatedUserID();
         return storageClient.uploadFile(files, ownerID);
     }
 
-    @GetMapping("/public/files/{fileID}")
+    @GetMapping("/public/{fileID}")
     public APIResponse<?> getFilePub(@PathVariable("fileID") String fileID) {
         return storageClient.getFilePub(fileID);
     }
 
-    @GetMapping("/public/files/view-file/{fileID}")
+    @GetMapping("/public/view/{fileID}")
     public ResponseEntity<InputStreamResource> getFileView(
             @PathVariable("fileID") String fileID,
             @RequestParam(value = "width", required = false) Integer width,
@@ -63,21 +64,20 @@ public class StorageController {
     }
 
     @PreAuthorize("hasPermission('FILE','CREATE')")
-    @PostMapping("/private/files")
-    public APIResponse<String> createFilesPrivate(
-            @RequestPart("file") List<MultipartFile> files, @RequestParam("ownerID") String ownerID) {
-        String tokenClient = "Bearer " + userKCLService.tokenExchangeResponse().getAccessToken();
+    @PostMapping("/private")
+    public APIResponse<String> createFilesPrivate(@RequestPart("file") List<MultipartFile> files) {
+        String ownerID = SecurityUtils.getAuthenticatedUserID();
         return storageClient.createFiles(files, ownerID);
     }
 
     @PreAuthorize("hasPermission('FILE','VIEW')")
-    @GetMapping("/private/files/{fileID}")
+    @GetMapping("/private/{fileID}")
     public APIResponse<?> getFilePrivate(@PathVariable("fileID") String fileID) {
         return storageClient.getFilePrivate(fileID);
     }
 
     @PreAuthorize("hasPermission('FILE','VIEW')")
-    @GetMapping("/private/files/view-file/{fileID}")
+    @GetMapping("/private/view/{fileID}")
     public ResponseEntity<InputStreamResource> getFileViewPrivate(
             @PathVariable("fileID") String fileID,
             @RequestParam(value = "width", required = false) Integer width,
@@ -103,23 +103,23 @@ public class StorageController {
     }
 
     @PreAuthorize("hasPermission('FILE','DELETE')")
-    @PostMapping("/private/files/{fileID}/deleted")
+    @PostMapping("/private/{fileID}/deleted")
     public APIResponse<String> deleteFilePrivate(@PathVariable("fileID") String fileID) {
 
         return storageClient.deleteFilePrivate(fileID);
     }
 
     @PreAuthorize("hasPermission('FILE','VIEW')")
-    @GetMapping("/private/files/{fileID}/download")
+    @GetMapping("/private/{fileID}/download")
     public ResponseEntity<?> download(@PathVariable("fileID") String fileId) {
         ResponseEntity<Resource> response = storageClient.downloadFile(fileId);
         return ResponseEntity.ok().headers(response.getHeaders()).body(response.getBody());
     }
 
     @PreAuthorize("hasPermission('FILE','VIEW')")
-    @PostMapping("/private/files/getFiles")
+    @GetMapping("/private")
     public APIResponse<?> getFiles(@ModelAttribute FilesSearchRequest request) throws IOException {
-
+        log.info("request: {}", request);
         return storageClient.getFiles(request);
     }
 }

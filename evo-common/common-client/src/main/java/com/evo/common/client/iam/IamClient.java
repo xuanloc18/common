@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.UUID;
 
 @FeignClient(
-        url = "${app.iam.internal-url}",
+        url = "http://localhost:8088/api/iam",
         name = "iam",
         contextId = "common-iam",
         configuration = FeignClientConfiguration.class,

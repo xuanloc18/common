@@ -7,15 +7,15 @@ import dev.cxl.iam_service.application.dto.request.RoleRequest;
 import dev.cxl.iam_service.application.dto.response.APIResponse;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.RoleResponse;
-import dev.cxl.iam_service.application.service.RoleService;
+import dev.cxl.iam_service.application.service.impl.RoleServiceImpl;
 
 @RestController
 @RequestMapping("/roles")
 public class RoleController {
 
-    private final RoleService roleService;
+    private final RoleServiceImpl roleService;
 
-    public RoleController(RoleService roleService) {
+    public RoleController(RoleServiceImpl roleService) {
         this.roleService = roleService;
     }
 

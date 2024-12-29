@@ -7,12 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import dev.cxl.iam_service.domain.repository.PermissionRepository;
-import dev.cxl.iam_service.infrastructure.entity.Permission;
+import dev.cxl.iam_service.domain.repository.PermissionRepositoryDomain;
+import dev.cxl.iam_service.infrastructure.entity.PermissionEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
 
 @Component
-public class PermissionRepositoryImpl implements PermissionRepository {
+public class PermissionRepositoryImpl implements PermissionRepositoryDomain {
     private final JpaPermissionRespository jpaPermissionRespository;
 
     public PermissionRepositoryImpl(JpaPermissionRespository jpaPermissionRespository) {
@@ -20,12 +20,12 @@ public class PermissionRepositoryImpl implements PermissionRepository {
     }
 
     @Override
-    public Permission save(Permission permission) {
+    public PermissionEntity save(PermissionEntity permission) {
         return jpaPermissionRespository.save(permission);
     }
 
     @Override
-    public Page<Permission> findAll(Pageable pageable) {
+    public Page<PermissionEntity> findAll(Pageable pageable) {
         return jpaPermissionRespository.findAll(pageable);
     }
 
@@ -35,7 +35,7 @@ public class PermissionRepositoryImpl implements PermissionRepository {
     }
 
     @Override
-    public Optional<Permission> findByResourceCodeAndScope(String resourceCode, String scope) {
+    public Optional<PermissionEntity> findByResourceCodeAndScope(String resourceCode, String scope) {
         return jpaPermissionRespository.findByResourceCodeAndScope(resourceCode, scope);
     }
 
@@ -45,12 +45,12 @@ public class PermissionRepositoryImpl implements PermissionRepository {
     }
 
     @Override
-    public List<Permission> findPermissionIdByUser(String userID) {
+    public List<PermissionEntity> findPermissionIdByUser(String userID) {
         return jpaPermissionRespository.findPermissionIdByUser(userID);
     }
 
     @Override
-    public Optional<Permission> findById(String id) {
+    public Optional<PermissionEntity> findById(String id) {
         return jpaPermissionRespository.findById(id);
     }
 }

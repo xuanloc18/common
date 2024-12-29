@@ -1,5 +1,7 @@
 package dev.cxl.iam_service.application.dto.request;
 
+import com.evo.common.dto.response.SearchRequest;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

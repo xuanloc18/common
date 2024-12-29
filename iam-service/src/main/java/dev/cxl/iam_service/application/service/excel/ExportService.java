@@ -14,20 +14,20 @@ import org.springframework.web.multipart.MultipartFile;
 import com.evo.common.client.storage.StorageClient;
 
 import dev.cxl.iam_service.application.configuration.SecurityUtils;
-import dev.cxl.iam_service.application.service.ActivityService;
+import dev.cxl.iam_service.application.service.impl.ActivityServiceImpl;
 import dev.cxl.iam_service.domain.enums.UserAction;
-import dev.cxl.iam_service.domain.repository.UserInformationRepository;
-import dev.cxl.iam_service.infrastructure.entity.UserInformation;
+import dev.cxl.iam_service.domain.repository.UserInformationRepositoryDomain;
+import dev.cxl.iam_service.infrastructure.entity.UserInformationEntity;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class ExportService {
-    private final UserInformationRepository userInformationRepository;
+    private final UserInformationRepositoryDomain userInformationRepository;
     private final StorageClient storageClient;
-    private final ActivityService activityService;
+    private final ActivityServiceImpl activityService;
 
-    public ByteArrayInputStream exportUsers(List<UserInformation> users) throws IOException {
+    public ByteArrayInputStream exportUsers(List<UserInformationEntity> users) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Users");
 
@@ -49,7 +49,7 @@ public class ExportService {
             }
             // Ghi dữ liệu
             int rowIndex = 1;
-            for (UserInformation user : users) {
+            for (UserInformationEntity user : users) {
                 Row row = sheet.createRow(rowIndex++);
                 row.createCell(0).setCellValue(user.getUsername());
                 row.createCell(1).setCellValue(user.getFullName());

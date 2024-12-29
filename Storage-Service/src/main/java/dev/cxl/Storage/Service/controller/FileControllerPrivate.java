@@ -16,10 +16,12 @@ import dev.cxl.Storage.Service.repository.FilesRepositoryImpl;
 import dev.cxl.Storage.Service.service.FileServices;
 import dev.cxl.Storage.Service.service.FileUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/private/files")
+@RequestMapping("/private")
 public class FileControllerPrivate {
 
     private final FileUtils fileUtils;
@@ -49,7 +51,7 @@ public class FileControllerPrivate {
         return APIResponse.<Files>builder().result(fileServices.getFile(fileID)).build();
     }
 
-    @GetMapping("/view-file/{fileID}")
+    @GetMapping("/view/{fileID}")
     public ResponseEntity<InputStreamResource> getFileView(
             @PathVariable("fileID") String fileID,
             @RequestParam(value = "width", required = false) Integer width,
@@ -73,9 +75,9 @@ public class FileControllerPrivate {
         return fileServices.downloadFile(fileID);
     }
 
-    @PostMapping("/getFiles")
+    @PostMapping("/get")
     public APIResponse<Page<Files>> getFiles(@RequestBody FilesSearchRequest request) throws IOException {
-
+        log.info("request {}", request);
         return APIResponse.<Page<Files>>builder()
                 .result(filesRepositoryImpl.search(request))
                 .build();

@@ -16,7 +16,7 @@ import dev.cxl.Storage.Service.service.FileUtils;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/public/files")
+@RequestMapping("/public")
 @RequiredArgsConstructor
 public class FilesControllerPublic {
 
@@ -40,7 +40,7 @@ public class FilesControllerPublic {
                 .build();
     }
 
-    @PostMapping("/viewProfile")
+    @GetMapping("/view-profile/{fileID}")
     public ResponseEntity<?> viewProfile(@PathVariable("fileID") String fileID) throws IOException {
 
         return fileServices.downloadFile(fileID);
@@ -52,7 +52,7 @@ public class FilesControllerPublic {
         return APIResponse.<Files>builder().result(fileServices.getFile(fileID)).build();
     }
 
-    @GetMapping("/view-file/{fileID}")
+    @GetMapping("/view/{fileID}")
     public ResponseEntity<InputStreamResource> getFileView(
             @PathVariable("fileID") String fileID,
             @RequestParam(value = "width", required = false) Integer width,

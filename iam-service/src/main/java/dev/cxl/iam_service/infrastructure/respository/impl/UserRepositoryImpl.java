@@ -6,12 +6,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import dev.cxl.iam_service.domain.repository.UserRepository;
-import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
+import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
 
 @Component
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl implements UserRepositoryDomain {
     private final JpaUserRepository jpaUserRepository;
 
     public UserRepositoryImpl(JpaUserRepository jpaUserRepository) {
@@ -19,22 +19,22 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User save(User user) {
+    public UserEntity save(UserEntity user) {
         return jpaUserRepository.save(user);
     }
 
     @Override
-    public Optional<User> findById(String id) {
+    public Optional<UserEntity> findById(String id) {
         return jpaUserRepository.findById(id);
     }
 
     @Override
-    public Optional<User> findByUserMail(String userMail) {
+    public Optional<UserEntity> findByUserMail(String userMail) {
         return jpaUserRepository.findByUserMail(userMail);
     }
 
     @Override
-    public Optional<User> findByUserKCLID(String string) {
+    public Optional<UserEntity> findByUserKCLID(String string) {
         return jpaUserRepository.findByUserKCLID(string);
     }
 
@@ -44,12 +44,12 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Page<User> findAll(Pageable pageable) {
+    public Page<UserEntity> findAll(Pageable pageable) {
         return jpaUserRepository.findAll(pageable);
     }
 
     @Override
-    public Page<User> findUsersByKey(String key, Pageable pageable) {
+    public Page<UserEntity> findUsersByKey(String key, Pageable pageable) {
         return jpaUserRepository.findUsersByKey(key, pageable);
     }
 }

@@ -11,13 +11,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import dev.cxl.iam_service.infrastructure.entity.UserInformation;
+import dev.cxl.iam_service.infrastructure.entity.UserInformationEntity;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ExportService {
-    public ByteArrayInputStream exportUsers(List<UserInformation> users) throws IOException {
+    public ByteArrayInputStream exportUsers(List<UserInformationEntity> users) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Users");
             // Tạo tiêu đề
@@ -38,7 +38,7 @@ public class ExportService {
             }
             // Ghi dữ liệu
             int rowIndex = 1;
-            for (UserInformation user : users) {
+            for (UserInformationEntity user : users) {
                 Row row = sheet.createRow(rowIndex++);
                 row.createCell(0).setCellValue(user.getUsername());
                 row.createCell(1).setCellValue(user.getFullName());

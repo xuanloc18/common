@@ -1,19 +1,19 @@
 server:
   port: 8099
   servlet:
-    context-path: /storage
+    context-path: /api/storage
 spring:
   application:
     name: storage
     client-id: storage-service
     client-secret: storage-service
   datasource:
-    url: "jdbc:postgresql://localhost:5432/storageservice"
-    username: postgres
-    password: "@Chuxuanloc26032003"
-  #    url: "jdbc:mysql://localhost:3306/iamservice"
-  #    username: root
-  #    password: 260303
+#    url: "jdbc:postgresql://localhost:5432/storageservice"
+#    username: postgres
+#    password: "@Chuxuanloc26032003"
+      url: "jdbc:mysql://localhost:3306/iamservice"
+      username: root
+      password: 260303
   mail:
     host: "smtp.gmail.com"
     port: 587
@@ -30,7 +30,7 @@ spring:
       jwt:
         jwk-set-uris:
           sso: ${JWK_SSO_URL:http://localhost:8080/realms/CXL/protocol/openid-connect/certs}
-          internal: ${JWK_INTERNAL_URL:http://localhost:8088/iam/auth/api/certificate/.well-known/jwks.json}
+          internal: ${JWK_INTERNAL_URL:http://localhost:8088/api/iam/auth/api/certificate/.well-known/jwks.json}
   jpa:
     hibernate:
       ddl-auto: update
@@ -73,10 +73,6 @@ springdoc:
 file:
   document:
     path: storage
-app:
-  iam:
-    internal-url: http://localhost:8088/iam
-
 eureka:
   instance:
     prefer-ip-address: true

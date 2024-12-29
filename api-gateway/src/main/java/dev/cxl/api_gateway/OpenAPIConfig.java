@@ -12,10 +12,10 @@ public class OpenAPIConfig {
     public RouteLocator routeLocator(RouteLocatorBuilder builder) {
         return builder
                 .routes()
-                .route(r -> r.path("/iam/iam-swagger/v3/api-docs")
+                .route(r -> r.path("/api/iam/iam-swagger/v3/api-docs")
                         .and().method(HttpMethod.GET)
                         .uri("lb://iam"))
-                .route(r -> r.path("/storage/storage-swagger/v3/api-docs")
+                .route(r -> r.path("/api/storage/storage-swagger/v3/api-docs")
                         .and().method(HttpMethod.GET)
                         .uri("lb://storage"))
                 .build();

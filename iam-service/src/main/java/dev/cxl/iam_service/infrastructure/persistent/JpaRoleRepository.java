@@ -7,13 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import dev.cxl.iam_service.infrastructure.entity.Role;
+import dev.cxl.iam_service.infrastructure.entity.RoleEntity;
 
 @Repository
-public interface JpaRoleRepository extends JpaRepository<Role, String> {
+public interface JpaRoleRepository extends JpaRepository<RoleEntity, String> {
     Boolean existsByCode(String code);
 
-    Page<Role> findAll(Pageable pageable);
+    Page<RoleEntity> findAll(Pageable pageable);
 
-    Optional<Role> findByCode(String code);
+    Optional<RoleEntity> findByCode(String code);
 }

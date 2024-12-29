@@ -9,17 +9,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Repository
-public interface JpaUserRepository extends JpaRepository<User, String> {
-    Optional<User> findByUserMail(String userMail);
+public interface JpaUserRepository extends JpaRepository<UserEntity, String> {
+    Optional<UserEntity> findByUserMail(String userMail);
 
-    Optional<User> findByUserKCLID(String string);
+    Optional<UserEntity> findByUserKCLID(String string);
 
     boolean existsByUserMail(String userMail);
 
-    Page<User> findAll(Pageable pageable);
+    Page<UserEntity> findAll(Pageable pageable);
 
     //     CREATE EXTENSION IF NOT EXISTS unaccent;
     @Query(
@@ -27,5 +27,5 @@ public interface JpaUserRepository extends JpaRepository<User, String> {
                     + "WHERE unaccent(CONCAT(user_name, ' ', user_mail, ' ', first_name, ' ', last_name)) "
                     + "ILIKE unaccent('%' || :key || '%')",
             nativeQuery = true)
-    Page<User> findUsersByKey(@Param("key") String key, Pageable pageable);
+    Page<UserEntity> findUsersByKey(@Param("key") String key, Pageable pageable);
 }

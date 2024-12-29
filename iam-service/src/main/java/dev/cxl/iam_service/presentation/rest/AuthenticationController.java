@@ -23,8 +23,8 @@ import dev.cxl.iam_service.application.dto.response.APIResponse;
 import dev.cxl.iam_service.application.dto.response.AuthenticationResponse;
 import dev.cxl.iam_service.application.dto.response.DefaultClientTokenResponse;
 import dev.cxl.iam_service.application.dto.response.IntrospectResponse;
-import dev.cxl.iam_service.application.service.AuthenticationService;
-import dev.cxl.iam_service.application.service.UserService;
+import dev.cxl.iam_service.application.service.impl.AuthenticationServiceImpl;
+import dev.cxl.iam_service.application.service.impl.UserServiceImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,9 +35,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
+    private final AuthenticationServiceImpl authenticationService;
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     private final IdpConfig idpConfig;
 

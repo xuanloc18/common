@@ -2,6 +2,8 @@ package dev.cxl.iam_service.application.dto.request;
 
 import java.time.LocalDate;
 
+import com.evo.common.dto.response.SearchRequest;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

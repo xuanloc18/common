@@ -16,24 +16,24 @@ import org.springframework.web.multipart.MultipartFile;
 import com.evo.common.client.storage.StorageClient;
 
 import dev.cxl.iam_service.application.configuration.SecurityUtils;
-import dev.cxl.iam_service.application.service.ActivityService;
-import dev.cxl.iam_service.application.service.UtilUserService;
+import dev.cxl.iam_service.application.service.impl.ActivityServiceImpl;
+import dev.cxl.iam_service.application.service.impl.UtilUserServiceImpl;
 import dev.cxl.iam_service.domain.enums.UserAction;
-import dev.cxl.iam_service.domain.repository.UserInformationRepository;
-import dev.cxl.iam_service.infrastructure.entity.UserInformation;
+import dev.cxl.iam_service.domain.repository.UserInformationRepositoryDomain;
+import dev.cxl.iam_service.infrastructure.entity.UserInformationEntity;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ImportService {
-    private final UtilUserService utilUserService;
-    private final UserInformationRepository userInformationRepository;
+    private final UtilUserServiceImpl utilUserService;
+    private final UserInformationRepositoryDomain userInformationRepository;
     private final StorageClient client;
-    private final ActivityService activityService;
+    private final ActivityServiceImpl activityService;
 
     public List<String> importUsers(MultipartFile file) throws IOException {
         List<String> errors = new ArrayList<>();
-        List<UserInformation> users = new ArrayList<>();
+        List<UserInformationEntity> users = new ArrayList<>();
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -44,7 +44,7 @@ public class ImportService {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                UserInformation user = parseRow(row, i + 1, idFile, errors);
+                UserInformationEntity user = parseRow(row, i + 1, idFile, errors);
                 if (user != null) {
                     users.add(user);
                 }
@@ -60,7 +60,7 @@ public class ImportService {
         return errors;
     }
 
-    private UserInformation parseRow(Row row, int rowIndex, String fileId, List<String> errors) {
+    private UserInformationEntity parseRow(Row row, int rowIndex, String fileId, List<String> errors) {
         try {
             String username = getCellString(row, 0, "Username", rowIndex, errors);
             if (username == null || utilUserService.userExists(username)) {
@@ -68,7 +68,7 @@ public class ImportService {
                 return null;
             }
 
-            UserInformation user = new UserInformation();
+            UserInformationEntity user = new UserInformationEntity();
             user.setUsername(username);
             user.setFullName(getCellString(row, 1, "Họ tên", rowIndex, errors));
             user.setDateOfBirth(getCellDate(row, 2, "Ngày sinh", rowIndex, errors));
@@ -126,7 +126,7 @@ public class ImportService {
         return null;
     }
 
-    private void validateUser(UserInformation user, List<String> errors, int rowIndex) {
+    private void validateUser(UserInformationEntity user, List<String> errors, int rowIndex) {
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
             errors.add("Dòng " + rowIndex + ": Username bị trống.");
         }

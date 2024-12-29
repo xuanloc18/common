@@ -1,12 +1,12 @@
 package dev.cxl.iam_service.infrastructure.respository.custom;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import dev.cxl.iam_service.application.dto.request.UserSearchRequest;
-import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 public interface UserRepositoryCustom {
-    List<User> search(UserSearchRequest request);
+    Page<UserEntity> search(UserSearchRequest request);
 
     Long count(UserSearchRequest request);
 }

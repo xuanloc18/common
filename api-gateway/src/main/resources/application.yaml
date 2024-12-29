@@ -4,8 +4,8 @@ spring:
   cloud:
     gateway:
       httpclient:
-        connect-timeout: 5000
-        response-timeout: 5000 # Thời gian chờ phản hồi (ms)
+        connect-timeout: 10000
+        response-timeout: 10000 # Thời gian chờ phản hồi (ms)
       discovery:
         locator:
           enabled: true
@@ -17,7 +17,7 @@ spring:
         - id: iam
           uri: lb://IAM
           predicates:
-            - Path=/iam/**
+            - Path=/api/iam/**
           filters:
             - name: CircuitBreaker
               args:
@@ -32,7 +32,7 @@ spring:
         - id: storage
           uri: lb://STORAGE
           predicates:
-            - Path=/storage/**
+            - Path=/api/storage/**
           filters:
             - name: CircuitBreaker
               args:
@@ -61,9 +61,9 @@ springdoc:
     path: /swagger-ui.html
     urls:
       - name: iam
-        url: /iam/iam-swagger/v3/api-docs
+        url: /api/iam/iam-swagger/v3/api-docs
       - name: storage_service
-        url: /storage/storage-swagger/v3/api-docs
+        url: /api/storage/storage-swagger/v3/api-docs
 
 server:
   port: 8888
@@ -99,7 +99,7 @@ resilience4j:
   timeout:
     instances:
       default:
-        timeoutDuration: 5000ms
+        timeoutDuration: 10000ms
   timelimiter:
     configs:
       default:

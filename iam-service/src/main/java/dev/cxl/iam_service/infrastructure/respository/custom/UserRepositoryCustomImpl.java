@@ -9,10 +9,14 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import dev.cxl.iam_service.application.dto.request.UserSearchRequest;
-import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Service
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
@@ -21,21 +25,32 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     private EntityManager entityManager;
 
     @Override
-    public List<User> search(UserSearchRequest request) {
+    public Page<UserEntity> search(UserSearchRequest request) {
         Map<String, Object> values = new HashMap<>();
-        String sql =
-                "select u from User u " + createWhereQuery(request, values) + createOrderQuery(request.getSortBy());
-        Query query = entityManager.createQuery(sql, User.class);
+        String sql = "select u from UserEntity u " + createWhereQuery(request, values)
+                + createOrderQuery(request.getSortBy());
+        Query query = entityManager.createQuery(sql, UserEntity.class);
         values.forEach(query::setParameter);
-        query.setFirstResult((request.getPageIndex() - 1) * request.getPageSize());
+        // Tính toán phân trang
+        int firstResult = (request.getPageIndex() - 1) * request.getPageSize();
+        query.setFirstResult(firstResult);
         query.setMaxResults(request.getPageSize());
-        return query.getResultList();
+
+        // Lấy kết quả từ database
+        List<UserEntity> resultList = query.getResultList();
+
+        // Tạo đối tượng Pageable với pageIndex và pageSize
+        Pageable pageable = PageRequest.of(request.getPageIndex() - 1, request.getPageSize());
+
+        // Trả về PageImpl với số lượng bản ghi và các tham số phân trang
+        //        new PageImpl<>(resultList, pageable, count(request));
+        return new PageImpl<>(resultList, pageable, count(request));
     }
 
     @Override
     public Long count(UserSearchRequest request) {
         Map<String, Object> values = new HashMap<>();
-        String sql = "select count(u) from User u " + createWhereQuery(request, values);
+        String sql = "select count(u) from UserEntity u " + createWhereQuery(request, values);
         Query query = entityManager.createQuery(sql, Long.class);
         values.forEach(query::setParameter);
         return (Long) query.getSingleResult();

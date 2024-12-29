@@ -7,12 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import dev.cxl.iam_service.domain.repository.RoleRepository;
-import dev.cxl.iam_service.infrastructure.entity.Role;
+import dev.cxl.iam_service.domain.repository.RoleRepositoryDomain;
+import dev.cxl.iam_service.infrastructure.entity.RoleEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaRoleRepository;
 
 @Component
-public class RoleRepositoryImpl implements RoleRepository {
+public class RoleRepositoryImpl implements RoleRepositoryDomain {
     private final JpaRoleRepository jpaRoleRepository;
 
     public RoleRepositoryImpl(JpaRoleRepository jpaRoleRepository) {
@@ -20,7 +20,7 @@ public class RoleRepositoryImpl implements RoleRepository {
     }
 
     @Override
-    public Role save(Role role) {
+    public RoleEntity save(RoleEntity role) {
         return jpaRoleRepository.save(role);
     }
 
@@ -30,17 +30,17 @@ public class RoleRepositoryImpl implements RoleRepository {
     }
 
     @Override
-    public Page<Role> findAll(Pageable pageable) {
+    public Page<RoleEntity> findAll(Pageable pageable) {
         return jpaRoleRepository.findAll(pageable);
     }
 
     @Override
-    public List<Role> findAll(List<String> strings) {
+    public List<RoleEntity> findAll(List<String> strings) {
         return jpaRoleRepository.findAllById(strings);
     }
 
     @Override
-    public Optional<Role> findByCode(String code) {
+    public Optional<RoleEntity> findByCode(String code) {
         return jpaRoleRepository.findByCode(code);
     }
 }

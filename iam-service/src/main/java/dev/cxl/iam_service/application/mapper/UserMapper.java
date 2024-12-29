@@ -7,18 +7,18 @@ import org.mapstruct.MappingTarget;
 
 import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
-import dev.cxl.iam_service.domain.domainentity.UserDomain;
-import dev.cxl.iam_service.infrastructure.entity.User;
+import dev.cxl.iam_service.domain.domainentity.User;
+import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    User toUser(UserDomain request);
+    UserEntity toUser(User request);
 
-    UserDomain toUserDomain(User request);
+    User toUserDomain(UserEntity request);
 
-    UserResponse toUserResponse(User user);
+    UserResponse toUserResponse(UserEntity user);
 
-    User updateUser(@MappingTarget User user, UserUpdateRequest request);
+    UserEntity updateUser(@MappingTarget UserEntity user, UserUpdateRequest request);
 
-    List<UserResponse> toUserResponseList(List<User> users);
+    List<UserResponse> toUserResponseList(List<UserEntity> users);
 }
