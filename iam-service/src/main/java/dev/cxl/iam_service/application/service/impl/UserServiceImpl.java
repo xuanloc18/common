@@ -3,6 +3,8 @@ package dev.cxl.iam_service.application.service.impl;
 import java.text.ParseException;
 import java.util.*;
 
+import dev.cxl.iam_service.domain.command.*;
+import dev.cxl.iam_service.domain.domainentity.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,10 +33,6 @@ import dev.cxl.iam_service.application.mapper.ForgotPassWordCommand;
 import dev.cxl.iam_service.application.mapper.UserMapper;
 import dev.cxl.iam_service.application.mapper.UserRoleMapper;
 import dev.cxl.iam_service.application.service.custom.UserService;
-import dev.cxl.iam_service.domain.command.ConfirmCreateUserCommand;
-import dev.cxl.iam_service.domain.command.UserCreationCommand;
-import dev.cxl.iam_service.domain.command.UserReplacePassCommand;
-import dev.cxl.iam_service.domain.command.UserUpdateCommand;
 import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
@@ -67,8 +65,6 @@ public class UserServiceImpl implements UserService {
 
     private final StorageClient client;
 
-    private final UserRoleServiceImpl userRoleService;
-
     private final RoleServiceImpl roleService;
 
     @Value("${idp.enable}")
@@ -87,8 +83,6 @@ public class UserServiceImpl implements UserService {
             UserKCLServiceImpl userKCLService,
             UtilUserServiceImpl utilUser,
             StorageClient client,
-            UserRoleServiceImpl userRoleService1,
-            UserRoleMapper userRoleMapper,
             RoleServiceImpl roleService,
             TokenCacheService tokenService) {
         this.userRepository = userRepository;
@@ -101,7 +95,6 @@ public class UserServiceImpl implements UserService {
         this.userKCLService = userKCLService;
         this.utilUser = utilUser;
         this.client = client;
-        this.userRoleService = userRoleService1;
         this.roleService = roleService;
         this.tokenService = tokenService;
     }
@@ -113,8 +106,8 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         List<String> listRolesExits = new ArrayList<>();
-        if (request.getRolesId() != null && !request.getRolesId().isEmpty()) {
-            listRolesExits = roleService.listRolesExit(request.getRolesId());
+        if (request.getRoleCode() != null && !request.getRoleCode().isEmpty()) {
+            listRolesExits = roleService.listRolesExit(request.getRoleCode());
         }
         User user = new User(
                 userCreationCommand, passwordEncoder, () -> userKCLService.createUserKCL(request), listRolesExits);
@@ -246,5 +239,22 @@ public class UserServiceImpl implements UserService {
         tokenService.invalidToken(signedJWT.getJWTClaimsSet().getJWTID());
 
         return true;
+    }
+    public void userAddRole(UserRoleRequest userRoleRequest) {
+        User user = utilUser.getUserDomainByMail(userRoleRequest.getUserMail());
+        UserRoleCommand userRoleCommand = userMapper.toUserRoleCommand(userRoleRequest);
+        List<String> roleIDs=roleService.listRolesExit(userRoleCommand.getRoleCodes());
+        user.addUserRole(roleIDs);
+        log.info("user xxxxxxxxxx  " + user);
+        userRepository.saveAfterAddRole(user);
+
+    }
+    public void userDeleteRole(UserRoleRequest userRoleRequest) {
+        User user = utilUser.getUserDomainByMail(userRoleRequest.getUserMail());
+        UserRoleCommand userRoleCommand = userMapper.toUserRoleCommand(userRoleRequest);
+        List<String> roleIDs=roleService.listRolesExit(userRoleCommand.getRoleCodes());
+        user.deleteUserRole(roleIDs);
+        userRepository.saveAfterDeleteRole(user);
+
     }
 }

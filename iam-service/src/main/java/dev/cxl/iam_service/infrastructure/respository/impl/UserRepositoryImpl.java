@@ -1,7 +1,9 @@
 package dev.cxl.iam_service.infrastructure.respository.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,6 +61,45 @@ public class UserRepositoryImpl implements UserRepositoryDomain {
             user.setUserRoles(userRoleDomains);
         }
         return user;
+    }
+
+    @Override
+    public void saveAfterDeleteRole(User user) {
+        User userData=getUserByUserId(user.getUserID());
+        List<UserRole> notInList1=new ArrayList<>();
+        // check userRole để xóa
+        if(userData.getUserRoles()!=null&& !userData.getUserRoles().isEmpty()) {
+            notInList1 = userData.getUserRoles().stream()
+                    .filter(item2 -> user.getUserRoles().stream().noneMatch(item1 ->
+                            item2.getUserID().equals(item1.getUserID()) &&
+                                    item2.getRoleID().equals(item1.getRoleID())
+                    ))
+                    .collect(Collectors.toList());
+            notInList1.forEach(item -> {
+                item.setDeleted(true);
+            });
+        }
+        jpaUserRoleRepository.saveAll(userRoleMapper.toUserRoles(notInList1));
+    }
+
+    @Override
+    public void saveAfterAddRole(User user) {
+        User userData=getUserByUserId(user.getUserID());
+
+        //check userRole để thêm
+        if(userData.getUserRoles()==null||userData.getUserRoles().isEmpty()){
+            jpaUserRoleRepository.saveAll(userRoleMapper.toUserRoles(user.getUserRoles()));
+        }
+        else{
+            List<UserRole> notInList2 = user.getUserRoles().stream()
+                    .filter(item1 -> userData.getUserRoles().stream().noneMatch(item2 ->
+                            item1.getUserID().equals(item2.getUserID()) &&
+                                    item1.getRoleID().equals(item2.getRoleID())
+                    ))
+                    .collect(Collectors.toList());
+            jpaUserRoleRepository.saveAll(userRoleMapper.toUserRoles(notInList2));
+        }
+
     }
 
     @Override

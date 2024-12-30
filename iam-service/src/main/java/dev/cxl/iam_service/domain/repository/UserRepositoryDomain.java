@@ -13,6 +13,9 @@ public interface UserRepositoryDomain {
 
     User getUserByUserId(String userId);
 
+    void saveAfterDeleteRole(User user);
+    void saveAfterAddRole(User user);
+
     UserEntity save(User user);
 
     Optional<UserEntity> findById(String id);

@@ -40,6 +40,13 @@ public class RoleRepositoryImpl implements RoleRepositoryDomain {
     }
 
     @Override
+    public List<RoleEntity> findAllByCodeIn(List<String> strings) {
+        return jpaRoleRepository.findByCodeIn(strings);
+    }
+
+
+
+    @Override
     public Optional<RoleEntity> findByCode(String code) {
         return jpaRoleRepository.findByCode(code);
     }

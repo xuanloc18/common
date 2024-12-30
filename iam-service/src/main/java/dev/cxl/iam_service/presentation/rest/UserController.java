@@ -1,7 +1,9 @@
 package dev.cxl.iam_service.presentation.rest;
 
 import java.text.ParseException;
+import java.util.List;
 
+import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
@@ -129,5 +131,19 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> viewProfile() {
         return userService.viewProfile();
+    }
+
+    @PostMapping("/role")
+    public APIResponse<String> userAddRole (@RequestBody UserRoleRequest request) {
+        userService.userAddRole(request);
+        return APIResponse.<String>builder()
+                .result("Add UserRole successful")
+                .build();
+    }
+
+    @PostMapping("/role/deleted")
+    public APIResponse<String> userDeleteRole(@RequestBody UserRoleRequest request) {
+        userService.userDeleteRole(request);
+        return APIResponse.<String>builder().result("Delete UserRole successful").build();
     }
 }

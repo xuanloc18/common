@@ -16,6 +16,7 @@ public interface RoleRepositoryDomain {
     Page<RoleEntity> findAll(Pageable pageable);
 
     List<RoleEntity> findAll(List<String> strings);
+    List<RoleEntity> findAllByCodeIn(List<String> strings);
 
     Optional<RoleEntity> findByCode(String code);
 }

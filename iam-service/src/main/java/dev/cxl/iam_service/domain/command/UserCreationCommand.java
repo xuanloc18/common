@@ -21,5 +21,4 @@ public class UserCreationCommand {
     LocalDate dateOfBirth;
     String avatar;
     Boolean deleted;
-    List<String> rolesId;
-}
+    List<String> roleCode;}

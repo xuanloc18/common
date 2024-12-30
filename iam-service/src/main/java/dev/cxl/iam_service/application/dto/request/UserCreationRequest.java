@@ -29,5 +29,5 @@ public class UserCreationRequest {
     LocalDate dateOfBirth;
     String avatar;
     Boolean deleted;
-    List<String> rolesId;
+    List<String> roleCode;
 }

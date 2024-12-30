@@ -3,6 +3,7 @@ package dev.cxl.iam_service.application.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -84,7 +85,11 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<String> listRolesExit(List<String> id) {
-        return roleRepository.findAll(id).stream().map(RoleEntity::getId).collect(Collectors.toList());
-    }
+    public List<String> listRolesExit(List<String> roleCodes) {
+        return roleRepository.findAllByCodeIn(roleCodes).stream().map(RoleEntity::getId).collect(Collectors.toList());
+
+
+
+
+}
 }

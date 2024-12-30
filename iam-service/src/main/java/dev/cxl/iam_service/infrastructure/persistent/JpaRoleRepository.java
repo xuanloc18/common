@@ -1,5 +1,6 @@
 package dev.cxl.iam_service.infrastructure.persistent;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -16,4 +17,7 @@ public interface JpaRoleRepository extends JpaRepository<RoleEntity, String> {
     Page<RoleEntity> findAll(Pageable pageable);
 
     Optional<RoleEntity> findByCode(String code);
+
+    List<RoleEntity> findByCodeIn(List<String> codes);
+
 }

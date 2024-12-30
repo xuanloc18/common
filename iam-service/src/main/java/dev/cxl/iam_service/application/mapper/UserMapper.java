@@ -2,6 +2,8 @@ package dev.cxl.iam_service.application.mapper;
 
 import java.util.List;
 
+import dev.cxl.iam_service.application.dto.request.UserRoleRequest;
+import dev.cxl.iam_service.domain.command.UserRoleCommand;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
@@ -32,4 +34,6 @@ public interface UserMapper {
     List<UserResponse> toUserResponseList(List<UserEntity> users);
 
     UserReplacePassCommand toUserReplacePassCommand(UserReplacePass request);
+
+    UserRoleCommand toUserRoleCommand(UserRoleRequest request);
 }

@@ -94,8 +94,24 @@ public class User extends Auditable {
         });
     }
 
-    public void addUserRole(UserRole userRoleDomain) {
-        this.userRoles.add(userRoleDomain);
+    public void addUserRole(List<String> roleIds) {
+        roleIds.forEach(roleId -> {
+            UserRole userRole = new UserRole();
+            this.userRoles.add(userRole.builder()
+                            .id(UUID.randomUUID().toString())
+                            .roleID(roleId)
+                            .userID(this.userID)
+                            .deleted(false)
+                    .build());
+        });
+
+    }
+
+    public void deleteUserRole(List<String> roleIds) {
+        roleIds.forEach(roleId -> {
+            userRoles.removeIf(userRole -> userRole.getRoleID().equals(roleId));
+        });
+
     }
 
     public void createProfile(String profile) {

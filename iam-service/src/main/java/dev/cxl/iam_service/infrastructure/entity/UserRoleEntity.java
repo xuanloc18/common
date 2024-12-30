@@ -15,7 +15,6 @@ import lombok.experimental.FieldDefaults;
 public class UserRoleEntity extends AuditableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     String id;
 
