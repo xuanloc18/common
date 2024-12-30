@@ -39,6 +39,6 @@ public class UserRoleRepositoryImpl implements UserRoleRepositoryDomain {
 
     @Override
     public boolean existsByUserIdAndRoleId(String userId, String roleId) {
-        return userRoleRepository.existsUserRoleByUserIDAndRoleID(userId, roleId);
+        return !userRoleRepository.existsUserRoleByUserIDAndRoleID(userId, roleId);
     }
 }

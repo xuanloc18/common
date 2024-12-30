@@ -15,8 +15,7 @@ import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
 import dev.cxl.iam_service.application.mapper.UserMapper;
 import dev.cxl.iam_service.application.service.impl.*;
 import dev.cxl.iam_service.domain.domainentity.User;
-import dev.cxl.iam_service.infrastructure.entity.UserEntity;
-import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
+import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
 
 @Service
 public class DefaultServiceImpl implements IAuthService {
@@ -27,7 +26,7 @@ public class DefaultServiceImpl implements IAuthService {
 
     private final UserServiceImpl userService;
 
-    private final JpaUserRepository userRepository;
+    private final UserRepositoryDomain userRepository;
 
     private final UserKCLServiceImpl userKCLService;
 
@@ -35,13 +34,11 @@ public class DefaultServiceImpl implements IAuthService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final UserMapper userMapper;
-
     public DefaultServiceImpl(
             AuthenticationServiceImpl authenticationService,
             TwoFactorAuthServiceImpl twoFactorAuthService,
             UserServiceImpl userService,
-            JpaUserRepository userRepository,
+            UserRepositoryDomain userRepository,
             UserKCLServiceImpl userKCLService,
             UtilUserServiceImpl utilUser,
             PasswordEncoder passwordEncoder,
@@ -53,7 +50,6 @@ public class DefaultServiceImpl implements IAuthService {
         this.userKCLService = userKCLService;
         this.utilUser = utilUser;
         this.passwordEncoder = passwordEncoder;
-        this.userMapper = userMapper;
     }
 
     @Override
@@ -81,8 +77,8 @@ public class DefaultServiceImpl implements IAuthService {
 
     @Override
     public Boolean enableUser(String token, String id, UserUpdateRequest request) throws ParseException {
-        UserEntity user = utilUser.finUserId(id);
-        user.setEnabled(request.getEnabled());
+        User user = utilUser.getUserDomainById(id);
+        user.enabled();
         userRepository.save(user);
         userKCLService.enableUser(
                 userKCLService.tokenExchangeResponse().getAccessToken(), user.getUserKCLID(), request);
@@ -90,16 +86,15 @@ public class DefaultServiceImpl implements IAuthService {
     }
 
     public Boolean delete(String id) {
-        UserEntity user = utilUser.finUserId(id);
-        User userDomain = userMapper.toUserDomain(user);
-        userDomain.deleted();
-        userRepository.save(userMapper.toUser(userDomain));
+        User user = utilUser.getUserDomainById(id);
+        user.deleted();
+        userRepository.save(user);
         return true;
     }
 
     @Override
     public Boolean resetPassword(String token, String id, ResetPassword resetPassword) throws ParseException {
-        UserEntity user = utilUser.finUserId(id);
+        User user = utilUser.getUserDomainById(id);
         user.setPassWord(passwordEncoder.encode(resetPassword.getValue()));
         userRepository.save(user);
         userKCLService.resetPassWord(

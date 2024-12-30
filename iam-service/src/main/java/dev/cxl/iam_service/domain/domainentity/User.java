@@ -11,9 +11,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
-import dev.cxl.iam_service.application.dto.request.UserCreationRequest;
-import dev.cxl.iam_service.application.dto.request.UserReplacePass;
-import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
+import dev.cxl.iam_service.domain.command.UserCreationCommand;
+import dev.cxl.iam_service.domain.command.UserReplacePassCommand;
+import dev.cxl.iam_service.domain.command.UserUpdateCommand;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -40,19 +40,19 @@ public class User extends Auditable {
     List<UserRole> userRoles = new ArrayList<>();
 
     public User(
-            UserCreationRequest userCreationRequest,
+            UserCreationCommand userCreationCommand,
             PasswordEncoder passwordEncoder,
             Supplier<String> userKCLSupplier,
             List<String> rolesExits) {
         this.userID = UUID.randomUUID().toString();
         this.userKCLID = userKCLSupplier.get();
-        this.userName = userCreationRequest.getUserName();
-        this.userMail = userCreationRequest.getUserMail();
-        this.passWord = passwordEncoder.encode(userCreationRequest.getPassWord());
-        this.firstName = userCreationRequest.getFirstName();
-        this.lastName = userCreationRequest.getLastName();
-        this.dateOfBirth = userCreationRequest.getDateOfBirth();
-        this.avatar = userCreationRequest.getAvatar();
+        this.userName = userCreationCommand.getUserName();
+        this.userMail = userCreationCommand.getUserMail();
+        this.passWord = passwordEncoder.encode(userCreationCommand.getPassWord());
+        this.firstName = userCreationCommand.getFirstName();
+        this.lastName = userCreationCommand.getLastName();
+        this.dateOfBirth = userCreationCommand.getDateOfBirth();
+        this.avatar = userCreationCommand.getAvatar();
         this.enabled = false;
         this.deleted = false;
         this.isRoot = false;
@@ -70,20 +70,20 @@ public class User extends Auditable {
         }
     }
 
-    public void update(UserUpdateRequest userUpdateRequest) {
-        this.firstName = userUpdateRequest.getFirstName();
-        this.lastName = userUpdateRequest.getLastName();
-        this.dateOfBirth = userUpdateRequest.getDateOfBirth();
-        this.enabled = userUpdateRequest.getEnabled();
-        this.deleted = userUpdateRequest.getDeleted();
+    public void update(UserUpdateCommand userUpdateCommand) {
+        this.firstName = userUpdateCommand.getFirstName();
+        this.lastName = userUpdateCommand.getLastName();
+        this.dateOfBirth = userUpdateCommand.getDateOfBirth();
+        this.enabled = userUpdateCommand.getEnabled();
+        this.deleted = userUpdateCommand.getDeleted();
     }
 
-    public void changePassword(UserReplacePass userRepalcePass, PasswordEncoder passwordEncoder) {
-        Boolean checkPass = passwordEncoder.matches(userRepalcePass.getOldPassword(), this.passWord);
+    public void changePassword(UserReplacePassCommand userReplacePassCommand, PasswordEncoder passwordEncoder) {
+        Boolean checkPass = passwordEncoder.matches(userReplacePassCommand.getOldPassword(), this.passWord);
         if (!checkPass) throw new AppException(ErrorCode.INVALID_KEY);
-        Boolean aBoolean = userRepalcePass.getConfirmPassword().equals(userRepalcePass.getNewPassword());
+        Boolean aBoolean = userReplacePassCommand.getConfirmPassword().equals(userReplacePassCommand.getNewPassword());
         if (!aBoolean) throw new RuntimeException("password does not confirm");
-        this.setPassWord(passwordEncoder.encode(userRepalcePass.getNewPassword()));
+        this.setPassWord(passwordEncoder.encode(userReplacePassCommand.getNewPassword()));
     }
 
     public void deleteUserRoles(String id) {
@@ -104,6 +104,10 @@ public class User extends Auditable {
 
     public void enabled() {
         this.enabled = true;
+    }
+
+    public void forgotPassword(String newPassword) {
+        this.passWord = newPassword;
     }
 
     public void disabled() {

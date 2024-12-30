@@ -54,8 +54,7 @@ public class HttpSecurityConfiguration {
                                 .requestMatchers("/api/public/**").permitAll()
                                 .requestMatchers("/api/authenticate/**").permitAll()
                                 .requestMatchers(SWAGGER_ENDPOINT).permitAll()
-                                .anyRequest().permitAll()
-
+                                .anyRequest().authenticated()
                 );
                http.oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationManagerResolver(this.jwkResolver(this.jwtProperties)));

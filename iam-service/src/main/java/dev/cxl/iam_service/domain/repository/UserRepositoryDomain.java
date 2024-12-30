@@ -5,11 +5,15 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 public interface UserRepositoryDomain {
+    User getUserByEmail(String email);
 
-    UserEntity save(UserEntity user);
+    User getUserByUserId(String userId);
+
+    UserEntity save(User user);
 
     Optional<UserEntity> findById(String id);
 
@@ -21,5 +25,4 @@ public interface UserRepositoryDomain {
 
     Page<UserEntity> findAll(Pageable pageable);
 
-    Page<UserEntity> findUsersByKey(String key, Pageable pageable);
 }

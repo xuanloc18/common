@@ -27,9 +27,14 @@ import dev.cxl.iam_service.application.configuration.SecurityUtils;
 import dev.cxl.iam_service.application.dto.request.*;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
+import dev.cxl.iam_service.application.mapper.ForgotPassWordCommand;
 import dev.cxl.iam_service.application.mapper.UserMapper;
 import dev.cxl.iam_service.application.mapper.UserRoleMapper;
 import dev.cxl.iam_service.application.service.custom.UserService;
+import dev.cxl.iam_service.domain.command.ConfirmCreateUserCommand;
+import dev.cxl.iam_service.domain.command.UserCreationCommand;
+import dev.cxl.iam_service.domain.command.UserReplacePassCommand;
+import dev.cxl.iam_service.domain.command.UserUpdateCommand;
 import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
@@ -103,41 +108,35 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(UserCreationRequest request) {
-        if (userRepository.existsByUserMail(request.getUserMail())) {
+        UserCreationCommand userCreationCommand = userMapper.toUserUserCreationCommand(request);
+        if (userRepository.existsByUserMail(userCreationCommand.getUserMail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         List<String> listRolesExits = new ArrayList<>();
         if (request.getRolesId() != null && !request.getRolesId().isEmpty()) {
             listRolesExits = roleService.listRolesExit(request.getRolesId());
         }
-
-        User userDomain =
-                new User(request, passwordEncoder, () -> userKCLService.createUserKCL(request), listRolesExits);
-
-        UserEntity user = userMapper.toUser(userDomain);
-        user.setRoot(true);
-        user.setEnabled(true);
-
+        User user = new User(
+                userCreationCommand, passwordEncoder, () -> userKCLService.createUserKCL(request), listRolesExits);
         // Save userRole
-        if (request.getRolesId() != null && !request.getRolesId().isEmpty()) {
-            userRoleService.saveAllUserRoles(userDomain.getUserRoles());
-        }
         twoFactorAuthService.sendCreatUser(user.getUserMail());
         userRepository.save(user);
     }
 
     @Override
     public void confirmCreateUser(String email, String otp) {
-        UserEntity user = utilUser.finUserMail(email);
-        Boolean check = twoFactorAuthService.validateOtp(
-                AuthenticationRequestTwo.builder().userMail(email).otp(otp).build());
+        User user = userRepository.getUserByEmail(email);
+        ConfirmCreateUserCommand confirmCreateUserCommand = new ConfirmCreateUserCommand(email, otp);
+        Boolean check = twoFactorAuthService.validateOtp(AuthenticationRequestTwo.builder()
+                .userMail(confirmCreateUserCommand.getUserMail())
+                .otp(confirmCreateUserCommand.getOtpCode())
+                .build());
         if (!check) {
             throw new AppException(ErrorCode.INVALID_OTP);
         }
-        User userDomain = userMapper.toUserDomain(user);
-        userDomain.enabled();
-        activityService.createHistoryActivity(userDomain.getUserID(), UserAction.CREATE);
-        userRepository.save(userMapper.toUser(userDomain));
+        user.enabled();
+        activityService.createHistoryActivity(user.getUserID(), UserAction.CREATE);
+        userRepository.save(user);
     }
 
     @Override
@@ -158,12 +157,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse updateUser(UserUpdateRequest request) {
+        UserUpdateCommand userUpdateCommand = userMapper.toUserUpdateCommand(request);
         String userID = SecurityUtils.getAuthenticatedUserID();
-        UserEntity user = utilUser.finUserId(userID);
-        User userDomain = userMapper.toUserDomain(user);
-        userDomain.update(request);
-        user = userMapper.toUser(userDomain);
-        // Save history activity
+        User user = userRepository.getUserByUserId(userID);
+        user.update(userUpdateCommand);
         activityService.createHistoryActivity(user.getUserID(), UserAction.UPDATE_PROFILE);
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -193,34 +190,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void replacePassword(UserReplacePass userRepalcePass) {
+    public void replacePassword(UserReplacePass userReplacePass) {
+        UserReplacePassCommand command = userMapper.toUserReplacePassCommand(userReplacePass);
         String id = SecurityUtils.getAuthenticatedUserID();
-        UserEntity user = utilUser.finUserId(id);
-        User userDomain = userMapper.toUserDomain(user);
-        userDomain.changePassword(userRepalcePass, passwordEncoder);
-        UserEntity user2 = userMapper.toUser(userDomain);
+        User user = userRepository.getUserByUserId(id);
+        user.changePassword(command, passwordEncoder);
+
         // Save history activity
         activityService.createHistoryActivity(user.getUserID(), UserAction.CHANGE_PASSWORD);
-        userRepository.save(user2);
+        userRepository.save(user);
     }
 
     @Override
     public Boolean createProfile(MultipartFile file) {
         String id = SecurityUtils.getAuthenticatedUserID();
-        UserEntity user = utilUser.finUserId(id);
-        User userDomain = userMapper.toUserDomain(user);
+        User user = utilUser.getUserDomainById(id);
         APIResponse<String> apiResponse = client.createProfile(file, SecurityUtils.getAuthenticatedUserID());
-        userDomain.createProfile(apiResponse.getResult());
-        userRepository.save(userMapper.toUser(userDomain));
+        user.createProfile(apiResponse.getResult());
+        userRepository.save(user);
         return true;
     }
 
     @Override
     public ResponseEntity<Resource> viewProfile() {
         String userID = SecurityUtils.getAuthenticatedUserID();
-        UserEntity user = utilUser.finUserId(userID);
-        User userDomain = userMapper.toUserDomain(user);
-        ResponseEntity<Resource> response = client.viewProfile(userDomain.getProfile());
+        User user = utilUser.getUserDomainById(userID);
+        ResponseEntity<Resource> response = client.viewProfile(user.getProfile());
         return ResponseEntity.ok().headers(response.getHeaders()).body(response.getBody());
     }
 
@@ -233,14 +228,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean check(ForgotPassWord forgotPassWord) throws ParseException, JOSEException {
-        var response = authenticationService.introspect(
-                IntrospectRequest.builder().token(forgotPassWord.getToken()).build());
+        ForgotPassWordCommand forgotPassWordCommand =
+                new ForgotPassWordCommand(forgotPassWord.getToken(), forgotPassWord.getNewPass());
+        var response = authenticationService.introspect(IntrospectRequest.builder()
+                .token(forgotPassWordCommand.getToken())
+                .build());
         if (!response.isValid()) {
             return false;
         }
         SignedJWT signedJWT = SignedJWT.parse(forgotPassWord.getToken());
         String userid = signedJWT.getJWTClaimsSet().getSubject();
-        UserEntity user = utilUser.finUserId(userid);
+        User user = utilUser.getUserDomainById(userid);
         user.setPassWord(passwordEncoder.encode(forgotPassWord.getNewPass()));
         userRepository.save(user);
 

@@ -1,7 +1,5 @@
 package dev.cxl.iam_service.application.service.impl;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.evo.common.exception.AppException;
@@ -11,12 +9,10 @@ import dev.cxl.iam_service.application.mapper.UserMapper;
 import dev.cxl.iam_service.application.mapper.UserRoleMapper;
 import dev.cxl.iam_service.application.service.custom.UtilUserService;
 import dev.cxl.iam_service.domain.domainentity.User;
-import dev.cxl.iam_service.domain.domainentity.UserRole;
 import dev.cxl.iam_service.domain.repository.UserInformationRepositoryDomain;
 import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
 import dev.cxl.iam_service.domain.repository.UserRoleRepositoryDomain;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
-import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
 
 @Service
 public class UtilUserServiceImpl implements UtilUserService {
@@ -24,12 +20,6 @@ public class UtilUserServiceImpl implements UtilUserService {
     private final UserRepositoryDomain userRepository;
 
     private final UserInformationRepositoryDomain userInformationRepository;
-
-    private final UserMapper userMapper;
-
-    private final UserRoleMapper userRoleMapper;
-
-    private final UserRoleRepositoryDomain userRoleRepository;
 
     public UtilUserServiceImpl(
             UserRepositoryDomain userRepository,
@@ -39,9 +29,6 @@ public class UtilUserServiceImpl implements UtilUserService {
             UserRoleRepositoryDomain userRoleRepository) {
         this.userRepository = userRepository;
         this.userInformationRepository = userInformationRepository;
-        this.userMapper = userMapper;
-        this.userRoleMapper = userRoleMapper;
-        this.userRoleRepository = userRoleRepository;
     }
 
     @Override
@@ -65,12 +52,12 @@ public class UtilUserServiceImpl implements UtilUserService {
     }
 
     @Override
-    public User getUserDomain(String userID) {
-        UserEntity user = finUserId(userID);
-        User userDomain = userMapper.toUserDomain(user);
-        List<UserRoleEntity> userRole = userRoleRepository.findByUserID(userID);
-        List<UserRole> userRoleDomains = userRoleMapper.toUserRoleDomain(userRole);
-        userDomain.setUserRoles(userRoleDomains);
-        return userDomain;
+    public User getUserDomainById(String userID) {
+        return userRepository.getUserByUserId(userID);
+    }
+
+    @Override
+    public User getUserDomainByMail(String userMail) {
+        return userRepository.getUserByEmail(userMail);
     }
 }

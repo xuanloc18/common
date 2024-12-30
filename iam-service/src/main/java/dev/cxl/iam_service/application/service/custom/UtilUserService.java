@@ -12,5 +12,7 @@ public interface UtilUserService {
 
     boolean userExists(String userName);
 
-    User getUserDomain(String userID);
+    User getUserDomainById(String userID);
+
+    User getUserDomainByMail(String userMail);
 }

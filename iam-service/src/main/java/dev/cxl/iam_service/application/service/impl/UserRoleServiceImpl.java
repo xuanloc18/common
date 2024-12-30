@@ -49,22 +49,19 @@ public class UserRoleServiceImpl {
         boolean check = userRoleRepository.findByUserID(user.getUserID()).stream()
                 .anyMatch(userRole -> userRole.getRoleID().equals(role.getId()));
         if (check) throw new AppException(ErrorCode.USER_HAD_ROLE);
-        User userDomain = utilUser.getUserDomain(user.getUserID());
+        User userDomain = utilUser.getUserDomainById(user.getUserID());
         userDomain.addUserRole(UserRole.builder()
                 .roleID(role.getId())
                 .userID(userDomain.getUserID())
+                .deleted(false)
                 .build());
         return saveUserRoles(userRoleMapper.toUserRoles(userDomain.getUserRoles()));
-    }
-
-    public void saveAllUserRoles(List<UserRole> userRoleDomains) {
-        userRoleRepository.saveAll(userRoleMapper.toUserRoles(userRoleDomains));
     }
 
     public Boolean delete(String id) {
         UserRoleEntity userRole =
                 userRoleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_ROLE_NOT_EXISTED));
-        User userDomain = utilUser.getUserDomain(userRole.getUserID());
+        User userDomain = utilUser.getUserDomainById(userRole.getUserID());
         userDomain.deleteUserRoles(userRole.getId());
         userRole.setDeleted(true);
         userRoleRepository.save(userRole);
@@ -75,7 +72,7 @@ public class UserRoleServiceImpl {
     public List<UserRoleEntity> saveUserRoles(List<UserRoleEntity> userRoles) {
         List<UserRoleEntity> nonDuplicateRoles = userRoles.stream()
                 .filter(userRole ->
-                        !userRoleRepository.existsByUserIdAndRoleId(userRole.getUserID(), userRole.getRoleID()))
+                        userRoleRepository.existsByUserIdAndRoleId(userRole.getUserID(), userRole.getRoleID()))
                 .collect(Collectors.toList());
         return userRoleRepository.saveAll(nonDuplicateRoles);
     }
