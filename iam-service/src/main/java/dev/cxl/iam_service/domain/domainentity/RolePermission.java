@@ -4,27 +4,29 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 
-import dev.cxl.iam_service.application.dto.request.RolePermissionRequest;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Builder
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RolePermission extends Auditable {
-    @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
     String roleId;
     String permissionId;
-    Boolean deleted = false;
+    Boolean deleted;
 
-    public RolePermission(RolePermissionRequest rolePermissionRequest) {
+    public RolePermission(String roleId, String permissionId) {
         this.id = UUID.randomUUID().toString();
-        this.roleId = rolePermissionRequest.getRoleId();
-        this.permissionId = rolePermissionRequest.getPermissionId();
+        this.roleId = roleId;
+        this.permissionId = permissionId;
         this.deleted = false;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 }

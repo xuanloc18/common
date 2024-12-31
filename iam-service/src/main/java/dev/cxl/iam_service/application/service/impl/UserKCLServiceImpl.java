@@ -14,10 +14,11 @@ import dev.cxl.iam_service.application.dto.request.ResetPassword;
 import dev.cxl.iam_service.application.dto.request.UserCreationRequest;
 import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
 import dev.cxl.iam_service.application.service.auth.IndentityClient;
+import dev.cxl.iam_service.application.service.custom.UserKCLService;
 import lombok.experimental.NonFinal;
 
 @Service
-public class UserKCLServiceImpl {
+public class UserKCLServiceImpl implements UserKCLService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 

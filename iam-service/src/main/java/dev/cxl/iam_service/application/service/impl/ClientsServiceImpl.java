@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
+import dev.cxl.iam_service.application.service.custom.ClientsService;
 import dev.cxl.iam_service.domain.repository.ClientsRepositoryDomain;
 import dev.cxl.iam_service.infrastructure.entity.ClientsEntity;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ClientsServiceImpl {
+public class ClientsServiceImpl implements ClientsService {
     private final ClientsRepositoryDomain clientsRepository;
 
     public void checkClientExists(String clientId, String clientSecret) {

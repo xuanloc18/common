@@ -1,8 +1,5 @@
 package com.evo.common.webapp.security;
 
-import com.evo.common.config.FeignClientInterceptor;
-import com.evo.common.exception.AppException;
-import com.evo.common.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

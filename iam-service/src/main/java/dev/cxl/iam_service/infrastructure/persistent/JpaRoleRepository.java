@@ -19,5 +19,4 @@ public interface JpaRoleRepository extends JpaRepository<RoleEntity, String> {
     Optional<RoleEntity> findByCode(String code);
 
     List<RoleEntity> findByCodeIn(List<String> codes);
-
 }

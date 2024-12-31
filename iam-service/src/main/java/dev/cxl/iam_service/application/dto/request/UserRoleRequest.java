@@ -1,9 +1,9 @@
 package dev.cxl.iam_service.application.dto.request;
 
+import java.util.List;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
 
 @Data
 @Builder

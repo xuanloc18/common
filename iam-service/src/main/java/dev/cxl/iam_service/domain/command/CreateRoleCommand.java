@@ -10,7 +10,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserRoleCommand {
-    private String userMail;
-    private List<String> roleCodes;
+public class CreateRoleCommand {
+
+    String name;
+    String code;
+    String description;
+    Boolean deleted = false;
+    List<String> permissions;
 }

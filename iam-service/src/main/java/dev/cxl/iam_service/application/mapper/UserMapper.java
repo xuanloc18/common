@@ -2,20 +2,18 @@ package dev.cxl.iam_service.application.mapper;
 
 import java.util.List;
 
-import dev.cxl.iam_service.application.dto.request.UserRoleRequest;
-import dev.cxl.iam_service.domain.command.UserRoleCommand;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
-import dev.cxl.iam_service.application.dto.request.UserCreationRequest;
-import dev.cxl.iam_service.application.dto.request.UserReplacePass;
-import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
+import dev.cxl.iam_service.application.dto.request.*;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
 import dev.cxl.iam_service.domain.command.UserCreationCommand;
 import dev.cxl.iam_service.domain.command.UserReplacePassCommand;
+import dev.cxl.iam_service.domain.command.UserRoleCommand;
 import dev.cxl.iam_service.domain.command.UserUpdateCommand;
 import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
+import dev.cxl.iam_service.domain.query.UserSearchQuery;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -28,6 +26,8 @@ public interface UserMapper {
     UserResponse toUserResponse(UserEntity user);
 
     UserCreationCommand toUserUserCreationCommand(UserCreationRequest request);
+
+    UserSearchQuery toUserUserSearchCommand(UserSearchRequest request);
 
     UserEntity updateUser(@MappingTarget UserEntity user, UserUpdateRequest request);
 

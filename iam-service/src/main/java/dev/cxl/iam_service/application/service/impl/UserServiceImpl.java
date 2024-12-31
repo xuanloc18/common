@@ -3,8 +3,6 @@ package dev.cxl.iam_service.application.service.impl;
 import java.text.ParseException;
 import java.util.*;
 
-import dev.cxl.iam_service.domain.command.*;
-import dev.cxl.iam_service.domain.domainentity.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +27,10 @@ import dev.cxl.iam_service.application.configuration.SecurityUtils;
 import dev.cxl.iam_service.application.dto.request.*;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
-import dev.cxl.iam_service.application.mapper.ForgotPassWordCommand;
 import dev.cxl.iam_service.application.mapper.UserMapper;
-import dev.cxl.iam_service.application.mapper.UserRoleMapper;
 import dev.cxl.iam_service.application.service.custom.UserService;
+import dev.cxl.iam_service.domain.command.*;
+import dev.cxl.iam_service.domain.command.ForgotPassWordCommand;
 import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
@@ -102,6 +100,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void createUser(UserCreationRequest request) {
         UserCreationCommand userCreationCommand = userMapper.toUserUserCreationCommand(request);
+        userCreationCommand.setPassWord(passwordEncoder.encode(request.getPassWord()));
         if (userRepository.existsByUserMail(userCreationCommand.getUserMail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
@@ -109,8 +108,7 @@ public class UserServiceImpl implements UserService {
         if (request.getRoleCode() != null && !request.getRoleCode().isEmpty()) {
             listRolesExits = roleService.listRolesExit(request.getRoleCode());
         }
-        User user = new User(
-                userCreationCommand, passwordEncoder, () -> userKCLService.createUserKCL(request), listRolesExits);
+        User user = new User(userCreationCommand, () -> userKCLService.createUserKCL(request), listRolesExits);
         // Save userRole
         twoFactorAuthService.sendCreatUser(user.getUserMail());
         userRepository.save(user);
@@ -185,9 +183,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void replacePassword(UserReplacePass userReplacePass) {
         UserReplacePassCommand command = userMapper.toUserReplacePassCommand(userReplacePass);
+        command.setConfirmPassword(passwordEncoder.encode(command.getConfirmPassword()));
+        command.setOldPassword(passwordEncoder.encode(command.getOldPassword()));
+        command.setNewPassword(passwordEncoder.encode(command.getNewPassword()));
         String id = SecurityUtils.getAuthenticatedUserID();
         User user = userRepository.getUserByUserId(id);
-        user.changePassword(command, passwordEncoder);
+        user.changePassword(command);
 
         // Save history activity
         activityService.createHistoryActivity(user.getUserID(), UserAction.CHANGE_PASSWORD);
@@ -232,7 +233,7 @@ public class UserServiceImpl implements UserService {
         SignedJWT signedJWT = SignedJWT.parse(forgotPassWord.getToken());
         String userid = signedJWT.getJWTClaimsSet().getSubject();
         User user = utilUser.getUserDomainById(userid);
-        user.setPassWord(passwordEncoder.encode(forgotPassWord.getNewPass()));
+        user.forgotPassword(passwordEncoder.encode(forgotPassWord.getNewPass()));
         userRepository.save(user);
 
         // Save history activity
@@ -240,21 +241,20 @@ public class UserServiceImpl implements UserService {
 
         return true;
     }
+
     public void userAddRole(UserRoleRequest userRoleRequest) {
         User user = utilUser.getUserDomainByMail(userRoleRequest.getUserMail());
         UserRoleCommand userRoleCommand = userMapper.toUserRoleCommand(userRoleRequest);
-        List<String> roleIDs=roleService.listRolesExit(userRoleCommand.getRoleCodes());
+        List<String> roleIDs = roleService.listRolesExit(userRoleCommand.getRoleCodes());
         user.addUserRole(roleIDs);
-        log.info("user xxxxxxxxxx  " + user);
         userRepository.saveAfterAddRole(user);
-
     }
+
     public void userDeleteRole(UserRoleRequest userRoleRequest) {
         User user = utilUser.getUserDomainByMail(userRoleRequest.getUserMail());
         UserRoleCommand userRoleCommand = userMapper.toUserRoleCommand(userRoleRequest);
-        List<String> roleIDs=roleService.listRolesExit(userRoleCommand.getRoleCodes());
+        List<String> roleIDs = roleService.listRolesExit(userRoleCommand.getRoleCodes());
         user.deleteUserRole(roleIDs);
         userRepository.saveAfterDeleteRole(user);
-
     }
 }

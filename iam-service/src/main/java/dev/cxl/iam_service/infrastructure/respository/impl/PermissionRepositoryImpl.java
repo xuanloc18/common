@@ -7,21 +7,26 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import dev.cxl.iam_service.application.mapper.PermissionMapper;
+import dev.cxl.iam_service.domain.domainentity.Permission;
 import dev.cxl.iam_service.domain.repository.PermissionRepositoryDomain;
 import dev.cxl.iam_service.infrastructure.entity.PermissionEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaPermissionRespository;
 
 @Component
 public class PermissionRepositoryImpl implements PermissionRepositoryDomain {
+    private final PermissionMapper permissionMapper;
     private final JpaPermissionRespository jpaPermissionRespository;
 
-    public PermissionRepositoryImpl(JpaPermissionRespository jpaPermissionRespository) {
+    public PermissionRepositoryImpl(
+            PermissionMapper permissionMapper, JpaPermissionRespository jpaPermissionRespository) {
+        this.permissionMapper = permissionMapper;
         this.jpaPermissionRespository = jpaPermissionRespository;
     }
 
     @Override
-    public PermissionEntity save(PermissionEntity permission) {
-        return jpaPermissionRespository.save(permission);
+    public PermissionEntity save(Permission permission) {
+        return jpaPermissionRespository.save(permissionMapper.toPermissionEntity(permission));
     }
 
     @Override
@@ -32,6 +37,11 @@ public class PermissionRepositoryImpl implements PermissionRepositoryDomain {
     @Override
     public Boolean existsByResourceCodeAndScope(String resourceCode, String scope) {
         return jpaPermissionRespository.existsByResourceCodeAndScope(resourceCode, scope);
+    }
+
+    @Override
+    public List<PermissionEntity> findAllByIdIn(List<String> ids) {
+        return jpaPermissionRespository.findAllById(ids);
     }
 
     @Override

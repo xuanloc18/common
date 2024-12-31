@@ -3,10 +3,10 @@ package dev.cxl.iam_service.domain.domainentity;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserInformation extends Auditable {

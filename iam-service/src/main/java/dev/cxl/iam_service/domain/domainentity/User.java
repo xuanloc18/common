@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
@@ -18,7 +16,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Builder
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -39,16 +37,12 @@ public class User extends Auditable {
     boolean isRoot;
     List<UserRole> userRoles = new ArrayList<>();
 
-    public User(
-            UserCreationCommand userCreationCommand,
-            PasswordEncoder passwordEncoder,
-            Supplier<String> userKCLSupplier,
-            List<String> rolesExits) {
+    public User(UserCreationCommand userCreationCommand, Supplier<String> userKCLSupplier, List<String> rolesExits) {
         this.userID = UUID.randomUUID().toString();
         this.userKCLID = userKCLSupplier.get();
         this.userName = userCreationCommand.getUserName();
         this.userMail = userCreationCommand.getUserMail();
-        this.passWord = passwordEncoder.encode(userCreationCommand.getPassWord());
+        this.passWord = userCreationCommand.getPassWord();
         this.firstName = userCreationCommand.getFirstName();
         this.lastName = userCreationCommand.getLastName();
         this.dateOfBirth = userCreationCommand.getDateOfBirth();
@@ -62,9 +56,7 @@ public class User extends Auditable {
     public void assignUserRoles(List<String> rolesExits) {
         if (rolesExits != null && !rolesExits.isEmpty()) {
             rolesExits.forEach(roleId -> {
-                UserRole userRole = new UserRole();
-                userRole.setUserID(this.userID);
-                userRole.setRoleID(roleId);
+                UserRole userRole = new UserRole(this.userID, roleId);
                 this.userRoles.add(userRole);
             });
         }
@@ -78,40 +70,25 @@ public class User extends Auditable {
         this.deleted = userUpdateCommand.getDeleted();
     }
 
-    public void changePassword(UserReplacePassCommand userReplacePassCommand, PasswordEncoder passwordEncoder) {
-        Boolean checkPass = passwordEncoder.matches(userReplacePassCommand.getOldPassword(), this.passWord);
+    public void changePassword(UserReplacePassCommand userReplacePassCommand) {
+        boolean checkPass = userReplacePassCommand.getOldPassword().equals(this.passWord);
         if (!checkPass) throw new AppException(ErrorCode.INVALID_KEY);
-        Boolean aBoolean = userReplacePassCommand.getConfirmPassword().equals(userReplacePassCommand.getNewPassword());
+        boolean aBoolean = userReplacePassCommand.getConfirmPassword().equals(userReplacePassCommand.getNewPassword());
         if (!aBoolean) throw new RuntimeException("password does not confirm");
-        this.setPassWord(passwordEncoder.encode(userReplacePassCommand.getNewPassword()));
-    }
-
-    public void deleteUserRoles(String id) {
-        this.userRoles.forEach(userRoleDomain1 -> {
-            if (userRoleDomain1.getRoleID().equals(id)) {
-                this.userRoles.remove(userRoleDomain1);
-            }
-        });
+        this.passWord = userReplacePassCommand.getNewPassword();
     }
 
     public void addUserRole(List<String> roleIds) {
         roleIds.forEach(roleId -> {
-            UserRole userRole = new UserRole();
-            this.userRoles.add(userRole.builder()
-                            .id(UUID.randomUUID().toString())
-                            .roleID(roleId)
-                            .userID(this.userID)
-                            .deleted(false)
-                    .build());
+            UserRole userRole = new UserRole(this.userID, roleId);
+            this.userRoles.add(userRole);
         });
-
     }
 
     public void deleteUserRole(List<String> roleIds) {
         roleIds.forEach(roleId -> {
             userRoles.removeIf(userRole -> userRole.getRoleID().equals(roleId));
         });
-
     }
 
     public void createProfile(String profile) {
@@ -132,5 +109,9 @@ public class User extends Auditable {
 
     public void deleted() {
         this.deleted = true;
+    }
+
+    public void setuserRoles(List<UserRole> userRoles) {
+        this.userRoles = userRoles;
     }
 }

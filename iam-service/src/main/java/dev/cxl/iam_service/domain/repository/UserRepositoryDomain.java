@@ -14,6 +14,7 @@ public interface UserRepositoryDomain {
     User getUserByUserId(String userId);
 
     void saveAfterDeleteRole(User user);
+
     void saveAfterAddRole(User user);
 
     UserEntity save(User user);
@@ -27,5 +28,4 @@ public interface UserRepositoryDomain {
     boolean existsByUserMail(String userMail);
 
     Page<UserEntity> findAll(Pageable pageable);
-
 }

@@ -5,13 +5,10 @@ import org.springframework.stereotype.Service;
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
-import dev.cxl.iam_service.application.mapper.UserMapper;
-import dev.cxl.iam_service.application.mapper.UserRoleMapper;
 import dev.cxl.iam_service.application.service.custom.UtilUserService;
 import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.domain.repository.UserInformationRepositoryDomain;
 import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
-import dev.cxl.iam_service.domain.repository.UserRoleRepositoryDomain;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Service
@@ -22,11 +19,7 @@ public class UtilUserServiceImpl implements UtilUserService {
     private final UserInformationRepositoryDomain userInformationRepository;
 
     public UtilUserServiceImpl(
-            UserRepositoryDomain userRepository,
-            UserInformationRepositoryDomain userInformationRepository,
-            UserMapper userMapper,
-            UserRoleMapper userRoleMapper,
-            UserRoleRepositoryDomain userRoleRepository) {
+            UserRepositoryDomain userRepository, UserInformationRepositoryDomain userInformationRepository) {
         this.userRepository = userRepository;
         this.userInformationRepository = userInformationRepository;
     }

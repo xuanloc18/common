@@ -1,7 +1,6 @@
 package dev.cxl.Storage.Service.controller;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 
 import org.springframework.core.io.InputStreamResource;
@@ -58,7 +57,7 @@ public class FilesControllerPublic {
             @RequestParam(value = "width", required = false) Integer width,
             @RequestParam(value = "height", required = false) Integer height,
             @RequestParam(value = "ratio", required = false) Double ratio)
-            throws MalformedURLException, IOException {
+            throws IOException {
         fileUtils.checkPublic(fileID);
         return fileServices.viewFile(fileID, width, height, ratio);
     }

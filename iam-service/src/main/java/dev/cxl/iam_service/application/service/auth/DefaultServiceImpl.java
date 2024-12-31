@@ -76,7 +76,7 @@ public class DefaultServiceImpl implements IAuthService {
     }
 
     @Override
-    public Boolean enableUser(String token, String id, UserUpdateRequest request) throws ParseException {
+    public Boolean enableUser(String token, String id, UserUpdateRequest request) {
         User user = utilUser.getUserDomainById(id);
         user.enabled();
         userRepository.save(user);
@@ -93,9 +93,9 @@ public class DefaultServiceImpl implements IAuthService {
     }
 
     @Override
-    public Boolean resetPassword(String token, String id, ResetPassword resetPassword) throws ParseException {
+    public Boolean resetPassword(String token, String id, ResetPassword resetPassword) {
         User user = utilUser.getUserDomainById(id);
-        user.setPassWord(passwordEncoder.encode(resetPassword.getValue()));
+        user.forgotPassword(passwordEncoder.encode(resetPassword.getValue()));
         userRepository.save(user);
         userKCLService.resetPassWord(
                 userKCLService.tokenExchangeResponse().getAccessToken(), user.getUserKCLID(), resetPassword);

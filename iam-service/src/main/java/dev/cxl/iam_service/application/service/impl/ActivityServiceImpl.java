@@ -6,12 +6,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
 
+import dev.cxl.iam_service.application.service.custom.ActivityService;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.infrastructure.entity.HistoryActivityEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaHistoryActivityRepository;
 
 @Service
-public class ActivityServiceImpl {
+public class ActivityServiceImpl implements ActivityService {
 
     private final JpaHistoryActivityRepository historyActivityRepository;
 

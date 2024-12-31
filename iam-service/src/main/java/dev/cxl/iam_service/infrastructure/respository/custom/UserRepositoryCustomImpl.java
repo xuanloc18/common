@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import dev.cxl.iam_service.application.mapper.UserMapper;
+import dev.cxl.iam_service.domain.query.UserSearchQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -20,35 +22,41 @@ import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Service
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
+    private final UserMapper  userMapper;
 
     @PersistenceContext
     private EntityManager entityManager;
 
+    public UserRepositoryCustomImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+
     @Override
     public Page<UserEntity> search(UserSearchRequest request) {
+        UserSearchQuery userSearchQuery=userMapper.toUserUserSearchCommand(request);
         Map<String, Object> values = new HashMap<>();
-        String sql = "select u from UserEntity u " + createWhereQuery(request, values)
-                + createOrderQuery(request.getSortBy());
+        String sql = "select u from UserEntity u " + createWhereQuery(userSearchQuery, values)
+                + createOrderQuery(userSearchQuery.getSortBy());
         Query query = entityManager.createQuery(sql, UserEntity.class);
         values.forEach(query::setParameter);
         // Tính toán phân trang
-        int firstResult = (request.getPageIndex() - 1) * request.getPageSize();
+        int firstResult = (userSearchQuery.getPageIndex() - 1) * userSearchQuery.getPageSize();
         query.setFirstResult(firstResult);
-        query.setMaxResults(request.getPageSize());
+        query.setMaxResults(userSearchQuery.getPageSize());
 
         // Lấy kết quả từ database
         List<UserEntity> resultList = query.getResultList();
 
         // Tạo đối tượng Pageable với pageIndex và pageSize
-        Pageable pageable = PageRequest.of(request.getPageIndex() - 1, request.getPageSize());
+        Pageable pageable = PageRequest.of(userSearchQuery.getPageIndex() - 1, userSearchQuery.getPageSize());
 
         // Trả về PageImpl với số lượng bản ghi và các tham số phân trang
-        //        new PageImpl<>(resultList, pageable, count(request));
-        return new PageImpl<>(resultList, pageable, count(request));
+        //        new PageImpl<>(resultList, pageable, count(userSearchQuery));
+        return new PageImpl<>(resultList, pageable, count(userSearchQuery));
     }
 
     @Override
-    public Long count(UserSearchRequest request) {
+    public Long count(UserSearchQuery request) {
         Map<String, Object> values = new HashMap<>();
         String sql = "select count(u) from UserEntity u " + createWhereQuery(request, values);
         Query query = entityManager.createQuery(sql, Long.class);
@@ -56,7 +64,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         return (Long) query.getSingleResult();
     }
 
-    private String createWhereQuery(UserSearchRequest request, Map<String, Object> values) {
+    private String createWhereQuery(UserSearchQuery request, Map<String, Object> values) {
         StringBuilder sql = new StringBuilder();
         //        sql.append(" left join RoleEntity r on (e.roleId = r.id) ");
         sql.append(" where u.deleted = false");

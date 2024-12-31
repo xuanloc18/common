@@ -30,6 +30,7 @@ import dev.cxl.iam_service.application.dto.request.IntrospectRequest;
 import dev.cxl.iam_service.application.dto.response.AuthenticationResponse;
 import dev.cxl.iam_service.application.dto.response.DefaultClientTokenResponse;
 import dev.cxl.iam_service.application.dto.response.IntrospectResponse;
+import dev.cxl.iam_service.application.service.custom.AuthenticationService;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
@@ -43,7 +44,7 @@ import lombok.experimental.NonFinal;
 @EnableConfigurationProperties(AuthenticationProperties.class)
 @RequiredArgsConstructor // là một annotation trong Lombok tự động tạo constructor cho các trường (fields) có giá trị là
 // final hoặc được đánh dấu là @NonNull
-public class AuthenticationServiceImpl {
+public class AuthenticationServiceImpl implements AuthenticationService {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     private final JpaUserRepository userRespository;

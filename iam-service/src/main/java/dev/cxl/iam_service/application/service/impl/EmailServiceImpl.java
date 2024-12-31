@@ -4,8 +4,10 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import dev.cxl.iam_service.application.service.custom.EmailService;
+
 @Service
-public class EmailServiceImpl {
+public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
 

@@ -1,9 +1,7 @@
 package dev.cxl.iam_service.presentation.rest;
 
 import java.text.ParseException;
-import java.util.List;
 
-import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
@@ -55,10 +53,10 @@ public class UserController {
     @PostMapping
     APIResponse<String> createUser(@RequestBody @Valid UserCreationRequest request) {
         iidpConfig.getAuthService().register(request);
-        return APIResponse.<String>builder().result("").build();
+        return APIResponse.<String>builder().result("Vào Mail xác nhận ").build();
     }
 
-    @PostMapping("/confirm")
+    @GetMapping("/confirm")
     APIResponse<String> confirmCreateUser(@RequestParam("email") String email, @RequestParam("otp") String otp) {
         userService.confirmCreateUser(email, otp);
         return APIResponse.<String>builder()
@@ -134,16 +132,16 @@ public class UserController {
     }
 
     @PostMapping("/role")
-    public APIResponse<String> userAddRole (@RequestBody UserRoleRequest request) {
+    public APIResponse<String> userAddRole(@RequestBody UserRoleRequest request) {
         userService.userAddRole(request);
-        return APIResponse.<String>builder()
-                .result("Add UserRole successful")
-                .build();
+        return APIResponse.<String>builder().result("Add UserRole successful").build();
     }
 
     @PostMapping("/role/deleted")
     public APIResponse<String> userDeleteRole(@RequestBody UserRoleRequest request) {
         userService.userDeleteRole(request);
-        return APIResponse.<String>builder().result("Delete UserRole successful").build();
+        return APIResponse.<String>builder()
+                .result("Delete UserRole successful")
+                .build();
     }
 }

@@ -12,10 +12,11 @@ import com.evo.common.exception.ErrorCode;
 
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequestTwo;
+import dev.cxl.iam_service.application.service.custom.TwoFactorAuthService;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Service
-public class TwoFactorAuthServiceImpl {
+public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 
     private final EmailServiceImpl emailService;
 
@@ -30,7 +31,7 @@ public class TwoFactorAuthServiceImpl {
         this.redisTemplate = redisTemplate;
     }
 
-    public static String generateOtp() {
+    public String generateOtp() {
         Integer otp = (100000 + (int) (Math.random() * 900000));
         return otp.toString();
     }
@@ -57,7 +58,7 @@ public class TwoFactorAuthServiceImpl {
         String otp = generateOtp();
         StringBuilder message = new StringBuilder();
         message.append("Click vào link thứ nhất để xác nhận đăng kí tài khoàn:<br>");
-        message.append("<a href=\"http://localhost:8088/api/iam/users/confirmCreateUser?email=");
+        message.append("<a href=\"http://localhost:8088/api/iam/users/confirm?email=");
         message.append(email);
         message.append("&otp=");
         message.append(otp);

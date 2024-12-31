@@ -3,7 +3,6 @@ package dev.cxl.iam_service.application.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,14 +10,17 @@ import org.springframework.stereotype.Service;
 import com.evo.common.exception.AppException;
 import com.evo.common.exception.ErrorCode;
 
+import dev.cxl.iam_service.application.dto.request.RolePermissionRequest;
 import dev.cxl.iam_service.application.dto.request.RoleRequest;
 import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.RoleResponse;
 import dev.cxl.iam_service.application.mapper.RoleMapper;
 import dev.cxl.iam_service.application.mapper.RolePermissionMapper;
+import dev.cxl.iam_service.application.service.custom.PermissionService;
 import dev.cxl.iam_service.application.service.custom.RoleService;
+import dev.cxl.iam_service.domain.command.CreateRoleCommand;
+import dev.cxl.iam_service.domain.command.RolePermissionCommand;
 import dev.cxl.iam_service.domain.domainentity.Role;
-import dev.cxl.iam_service.domain.repository.RolePermissionRepositoryDomain;
 import dev.cxl.iam_service.domain.repository.RoleRepositoryDomain;
 import dev.cxl.iam_service.infrastructure.entity.RoleEntity;
 import lombok.AccessLevel;
@@ -32,33 +34,48 @@ public class RoleServiceImpl implements RoleService {
 
     private final RoleRepositoryDomain roleRepository;
     private final RolePermissionMapper rolePermissionMapper;
-
     private final RoleMapper roleMapper;
-    private final RolePermissionRepositoryDomain rolePermissionRepository;
+    private final PermissionService permissionService;
 
     public RoleServiceImpl(
             RoleRepositoryDomain roleRepository,
             RolePermissionMapper rolePermissionMapper,
             RoleMapper roleMapper,
-            RolePermissionRepositoryDomain rolePermissionRepository) {
+            PermissionService permissionService) {
         this.roleRepository = roleRepository;
         this.rolePermissionMapper = rolePermissionMapper;
         this.roleMapper = roleMapper;
-        this.rolePermissionRepository = rolePermissionRepository;
+
+        this.permissionService = permissionService;
     }
 
     @Override
     public RoleResponse create(RoleRequest request) {
+        CreateRoleCommand createRoleCommand = roleMapper.toCreateRoleCommand(request);
         Boolean check = roleRepository.existsByCode(request.getCode());
         if (check) throw new AppException(ErrorCode.ROLE_EXISTED);
-        Role roleDomain = new Role(request);
-        RoleEntity role = roleMapper.toRole(roleDomain);
-        if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
-            rolePermissionRepository.saveAll(
-                    rolePermissionMapper.toRolePermissions(roleDomain.getRolePermissionDomains()));
-        }
+        Role roleDomain = new Role(createRoleCommand);
+        return roleMapper.toRoleResponse(roleRepository.save(roleDomain));
+    }
 
-        return roleMapper.toRoleResponse(roleRepository.save(role));
+    @Override
+    public void roleAddPermission(RolePermissionRequest request) {
+        RolePermissionCommand rolePermissionCommand =
+                rolePermissionMapper.rolePermissionToRolePermissionCommand(request);
+        Role role = roleRepository.getRoleByCode(rolePermissionCommand.getRoleCode());
+        List<String> listPerExits = permissionService.listPerExit(rolePermissionCommand.getPermissionIds());
+        role.roleAddPermissions(listPerExits);
+        roleRepository.saveAfterAddPer(role);
+    }
+
+    @Override
+    public void roleRemovePermission(RolePermissionRequest request) {
+        RolePermissionCommand rolePermissionCommand =
+                rolePermissionMapper.rolePermissionToRolePermissionCommand(request);
+        Role role = roleRepository.getRoleByCode(rolePermissionCommand.getRoleCode());
+        List<String> listPerExits = permissionService.listPerExit(rolePermissionCommand.getPermissionIds());
+        role.roleDeletePermissions(listPerExits);
+        roleRepository.saveAfterDeletePer(role);
     }
 
     @Override
@@ -78,18 +95,15 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void delete(String id) {
-        RoleEntity role = roleRepository.findByCode(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
-        Role roleDomain = roleMapper.toRoleDomain(role);
-        roleDomain.delete();
-        roleRepository.save(roleMapper.toRole(roleDomain));
+        Role role = roleRepository.findById(id);
+        role.delete();
+        roleRepository.save(role);
     }
 
     @Override
     public List<String> listRolesExit(List<String> roleCodes) {
-        return roleRepository.findAllByCodeIn(roleCodes).stream().map(RoleEntity::getId).collect(Collectors.toList());
-
-
-
-
-}
+        return roleRepository.findAllByCodeIn(roleCodes).stream()
+                .map(RoleEntity::getId)
+                .collect(Collectors.toList());
+    }
 }

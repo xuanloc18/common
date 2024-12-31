@@ -46,7 +46,7 @@ public class UserRepositoryImpl implements UserRepositoryDomain {
                 jpaUserRepository.findByUserMail(email).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
         User user = userMapper.toUserDomain(userEntity);
         List<UserRoleEntity> userRoleEntity = jpaUserRoleRepository.findByUserID(user.getUserID());
-        user.setUserRoles(userRoleMapper.toUserRoleDomain(userRoleEntity));
+        user.setuserRoles(userRoleMapper.toUserRoleDomain(userRoleEntity));
         return user;
     }
 
@@ -58,48 +58,42 @@ public class UserRepositoryImpl implements UserRepositoryDomain {
         List<UserRoleEntity> userRoleEntity = jpaUserRoleRepository.findByUserID(user.getUserID());
         if (userRoleEntity != null && !userRoleEntity.isEmpty()) {
             List<UserRole> userRoleDomains = userRoleMapper.toUserRoleDomain(userRoleEntity);
-            user.setUserRoles(userRoleDomains);
+            user.setuserRoles(userRoleDomains);
         }
         return user;
     }
 
     @Override
     public void saveAfterDeleteRole(User user) {
-        User userData=getUserByUserId(user.getUserID());
-        List<UserRole> notInList1=new ArrayList<>();
+        User userData = getUserByUserId(user.getUserID());
+        List<UserRole> notInList1 = new ArrayList<>();
         // check userRole để xóa
-        if(userData.getUserRoles()!=null&& !userData.getUserRoles().isEmpty()) {
+        if (userData.getUserRoles() != null && !userData.getUserRoles().isEmpty()) {
             notInList1 = userData.getUserRoles().stream()
-                    .filter(item2 -> user.getUserRoles().stream().noneMatch(item1 ->
-                            item2.getUserID().equals(item1.getUserID()) &&
-                                    item2.getRoleID().equals(item1.getRoleID())
-                    ))
+                    .filter(item2 -> user.getUserRoles().stream()
+                            .noneMatch(item1 -> item2.getUserID().equals(item1.getUserID())
+                                    && item2.getRoleID().equals(item1.getRoleID())))
                     .collect(Collectors.toList());
-            notInList1.forEach(item -> {
-                item.setDeleted(true);
-            });
+            notInList1.forEach(UserRole::delete);
         }
         jpaUserRoleRepository.saveAll(userRoleMapper.toUserRoles(notInList1));
     }
 
     @Override
     public void saveAfterAddRole(User user) {
-        User userData=getUserByUserId(user.getUserID());
+        User userData = getUserByUserId(user.getUserID());
 
-        //check userRole để thêm
-        if(userData.getUserRoles()==null||userData.getUserRoles().isEmpty()){
+        // check userRole để thêm
+        if (userData.getUserRoles() == null || userData.getUserRoles().isEmpty()) {
             jpaUserRoleRepository.saveAll(userRoleMapper.toUserRoles(user.getUserRoles()));
-        }
-        else{
+        } else {
             List<UserRole> notInList2 = user.getUserRoles().stream()
-                    .filter(item1 -> userData.getUserRoles().stream().noneMatch(item2 ->
-                            item1.getUserID().equals(item2.getUserID()) &&
-                                    item1.getRoleID().equals(item2.getRoleID())
-                    ))
+                    .filter(item1 -> userData.getUserRoles().stream()
+                            .noneMatch(item2 -> item1.getUserID().equals(item2.getUserID())
+                                    && item1.getRoleID().equals(item2.getRoleID())))
                     .collect(Collectors.toList());
             jpaUserRoleRepository.saveAll(userRoleMapper.toUserRoles(notInList2));
         }
-
     }
 
     @Override
@@ -134,6 +128,4 @@ public class UserRepositoryImpl implements UserRepositoryDomain {
     public Page<UserEntity> findAll(Pageable pageable) {
         return jpaUserRepository.findAll(pageable);
     }
-
-
 }

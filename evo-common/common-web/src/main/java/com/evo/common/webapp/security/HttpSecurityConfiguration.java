@@ -47,7 +47,7 @@ public class HttpSecurityConfiguration {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/auth/**","/confirm").permitAll()
                                 .requestMatchers("/health").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/users").permitAll()
                                 .requestMatchers("/api/certificate/.well-known/jwks.json").permitAll()

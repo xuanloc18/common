@@ -2,12 +2,12 @@ package dev.cxl.iam_service.domain.domainentity;
 
 import java.util.UUID;
 
-import dev.cxl.iam_service.application.dto.request.PermissionRequest;
+import dev.cxl.iam_service.domain.command.PermissionCommand;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Builder
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -19,11 +19,11 @@ public class Permission extends Auditable {
     String resourceCode;
     String scope;
 
-    public Permission(PermissionRequest permissionRequest) {
+    public Permission(PermissionCommand permissionCommand) {
         this.id = UUID.randomUUID().toString();
-        this.name = permissionRequest.getName();
-        this.resourceCode = permissionRequest.getResourceCode();
-        this.scope = permissionRequest.getScope();
+        this.name = permissionCommand.getName();
+        this.resourceCode = permissionCommand.getResourceCode();
+        this.scope = permissionCommand.getScope();
         this.deleted = false;
     }
 

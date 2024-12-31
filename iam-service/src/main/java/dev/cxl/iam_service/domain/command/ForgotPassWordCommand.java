@@ -1,4 +1,4 @@
-package dev.cxl.iam_service.application.dto.request;
+package dev.cxl.iam_service.domain.command;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RefreshRequest {
-
-    String refreshToken;
+public class ForgotPassWordCommand {
+    String token;
+    String newPass;
 }

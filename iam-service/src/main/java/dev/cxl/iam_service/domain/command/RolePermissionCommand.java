@@ -1,8 +1,6 @@
-package dev.cxl.iam_service.application.dto.request;
+package dev.cxl.iam_service.domain.command;
 
 import java.util.List;
-
-import jakarta.persistence.*;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RolePermissionRequest {
+public class RolePermissionCommand {
 
     String roleCode;
     List<String> permissionIds;
