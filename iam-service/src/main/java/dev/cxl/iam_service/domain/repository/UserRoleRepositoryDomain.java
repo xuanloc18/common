@@ -3,16 +3,18 @@ package dev.cxl.iam_service.domain.repository;
 import java.util.List;
 import java.util.Optional;
 
-import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
+import com.evo.common.DomainRepository;
 
-public interface UserRoleRepositoryDomain {
-    Optional<UserRoleEntity> findById(String id);
+import dev.cxl.iam_service.domain.domainentity.UserRole;
 
-    List<UserRoleEntity> findByUserID(String userId);
+public interface UserRoleRepositoryDomain extends DomainRepository<UserRole, String> {
+    Optional<UserRole> findById(String id);
 
-    UserRoleEntity save(UserRoleEntity userRole);
+    List<UserRole> findByUserID(String userId);
 
-    List<UserRoleEntity> saveAll(List<UserRoleEntity> userRoles);
+    UserRole save(UserRole userRole);
+
+    boolean saveAll(List<UserRole> userRoles);
 
     boolean existsByUserIdAndRoleId(String userId, String roleId);
 }

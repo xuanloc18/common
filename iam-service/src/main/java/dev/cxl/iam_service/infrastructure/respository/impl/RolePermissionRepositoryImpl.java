@@ -5,6 +5,11 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
+
+import dev.cxl.iam_service.application.mapper.RolePermissionMapper;
+import dev.cxl.iam_service.domain.domainentity.RolePermission;
 import dev.cxl.iam_service.domain.repository.RolePermissionRepositoryDomain;
 import dev.cxl.iam_service.infrastructure.entity.RolePermissionEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaRolePermissionRepository;
@@ -12,28 +17,57 @@ import dev.cxl.iam_service.infrastructure.persistent.JpaRolePermissionRepository
 @Component
 public class RolePermissionRepositoryImpl implements RolePermissionRepositoryDomain {
     private final JpaRolePermissionRepository rolePermissionRepository;
+    private final RolePermissionMapper rolePermissionMapper;
 
-    public RolePermissionRepositoryImpl(JpaRolePermissionRepository rolePermissionRepository) {
+    public RolePermissionRepositoryImpl(
+            JpaRolePermissionRepository rolePermissionRepository, RolePermissionMapper rolePermissionMapper) {
         this.rolePermissionRepository = rolePermissionRepository;
+        this.rolePermissionMapper = rolePermissionMapper;
     }
 
     @Override
-    public RolePermissionEntity save(RolePermissionEntity rolePermission) {
-        return rolePermissionRepository.save(rolePermission);
+    public RolePermission save(RolePermission rolePermission) {
+        return rolePermissionMapper.toRolePermission(
+                rolePermissionRepository.save(rolePermissionMapper.toRolePermissionEntity(rolePermission)));
     }
 
     @Override
-    public List<RolePermissionEntity> findByRoleId(String id) {
-        return rolePermissionRepository.findByRoleId(id);
+    public List<RolePermission> findByRoleId(String id) {
+        List<RolePermissionEntity> rolePermissionEntities = rolePermissionRepository.findByRoleId(id);
+        return rolePermissionMapper.toRolePermissions(rolePermissionEntities);
     }
 
     @Override
-    public Optional<RolePermissionEntity> findById(String id) {
-        return rolePermissionRepository.findById(id);
+    public Optional<RolePermission> findById(String id) {
+        RolePermissionEntity rolePermissionEntity = rolePermissionRepository
+                .findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_PERMISSION_NOT_EXISTED));
+        return Optional.of(rolePermissionMapper.toRolePermission(rolePermissionEntity));
     }
 
     @Override
-    public List<RolePermissionEntity> saveAll(List<RolePermissionEntity> rolePermissions) {
-        return rolePermissionRepository.saveAll(rolePermissions);
+    public List<RolePermission> findAllByIds(List<String> strings) {
+        return List.of();
+    }
+
+    @Override
+    public boolean saveAll(List<RolePermission> rolePermissions) {
+        rolePermissionMapper.toRolePermissionEntities(rolePermissions);
+        return true;
+    }
+
+    @Override
+    public boolean delete(RolePermission domain) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteById(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean existsById(String s) {
+        return false;
     }
 }

@@ -11,9 +11,13 @@ import dev.cxl.iam_service.infrastructure.entity.RolePermissionEntity;
 
 @Mapper(componentModel = "spring")
 public interface RolePermissionMapper {
-    List<RolePermissionEntity> toRolePermissions(List<RolePermission> rolePermissionDomains);
+    RolePermission toRolePermission(RolePermissionEntity rolePermissionEntity);
 
-    List<RolePermission> toRolePermissionDomains(List<RolePermissionEntity> rolePermissions);
+    RolePermissionEntity toRolePermissionEntity(RolePermission rolePermission);
 
-    RolePermissionCommand rolePermissionToRolePermissionCommand(RolePermissionRequest rolePermissionRequest);
+    List<RolePermission> toRolePermissions(List<RolePermissionEntity> rolePermissionEntities);
+
+    List<RolePermissionEntity> toRolePermissionEntities(List<RolePermission> rolePermissions);
+
+    RolePermissionCommand rolePermissionToRolePermissionCommand(RolePermissionRequest rolePermission);
 }

@@ -31,6 +31,7 @@ import dev.cxl.iam_service.application.dto.response.AuthenticationResponse;
 import dev.cxl.iam_service.application.dto.response.DefaultClientTokenResponse;
 import dev.cxl.iam_service.application.dto.response.IntrospectResponse;
 import dev.cxl.iam_service.application.service.custom.AuthenticationService;
+import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
@@ -80,7 +81,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequestTwo authenticationRequestTwo)
             throws ParseException {
-        UserEntity user = userUtil.finUserMail(authenticationRequestTwo.getUserMail());
+        User user = userUtil.findUserMail(authenticationRequestTwo.getUserMail());
         Boolean check = twoFactorAuthService.validateOtp(authenticationRequestTwo);
         if (!check) {
             throw new AppException(ErrorCode.INVALID_OTP);
@@ -98,7 +99,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public String generateToken(String mail) {
-        UserEntity user = userUtil.finUserMail(mail);
+        User user = userUtil.findUserMail(mail);
         JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUserID().toString())

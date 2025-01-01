@@ -18,7 +18,6 @@ import dev.cxl.iam_service.application.service.custom.PermissionService;
 import dev.cxl.iam_service.domain.command.PermissionCommand;
 import dev.cxl.iam_service.domain.domainentity.Permission;
 import dev.cxl.iam_service.domain.repository.PermissionRepositoryDomain;
-import dev.cxl.iam_service.infrastructure.entity.PermissionEntity;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -58,16 +57,15 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     public void delete(String id) {
-        PermissionEntity permission =
+        Permission permission =
                 permissionRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_EXISTED));
-        Permission permissionDomain = permissionMapper.toPermissionDomain(permission);
-        permissionDomain.delete();
-        permissionRepository.save(permissionMapper.toPermission(permission));
+        permission.delete();
+        permissionRepository.save(permission);
     }
 
     public List<String> listPerExit(List<String> permissionId) {
-        return permissionRepository.findAllByIdIn(permissionId).stream()
-                .map(PermissionEntity::getId)
+        return permissionRepository.findAllByIds(permissionId).stream()
+                .map(Permission::getId)
                 .collect(Collectors.toList());
     }
 }

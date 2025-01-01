@@ -9,18 +9,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.nimbusds.jose.JOSEException;
 
 import dev.cxl.iam_service.application.dto.request.*;
-import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
+import dev.cxl.iam_service.domain.domainentity.User;
 
 public interface UserService {
 
-    void createUser(UserCreationRequest request);
+    User createUser(UserCreationRequest request);
 
     void confirmCreateUser(String email, String otp);
 
-    PageResponse<UserResponse> getAllUsers(int page, int size);
-
-    UserResponse updateUser(UserUpdateRequest request);
+    void updateUser(UserUpdateRequest request);
 
     UserResponse getMyInfo();
 

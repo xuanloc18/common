@@ -115,8 +115,9 @@ public class UserController {
     }
 
     @PutMapping({"/inform"})
-    UserResponse updateUser(@RequestBody UserUpdateRequest request) {
-        return userService.updateUser(request);
+    APIResponse<String> updateUser(@RequestBody UserUpdateRequest request) {
+        userService.updateUser(request);
+        return APIResponse.<String>builder().result("update successful").build();
     }
 
     @PostMapping("profile")

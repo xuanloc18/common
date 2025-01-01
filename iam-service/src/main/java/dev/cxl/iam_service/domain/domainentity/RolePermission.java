@@ -29,4 +29,8 @@ public class RolePermission extends Auditable {
     public void delete() {
         this.deleted = true;
     }
+
+    public void setDeleted() {
+        this.deleted = false;
+    }
 }

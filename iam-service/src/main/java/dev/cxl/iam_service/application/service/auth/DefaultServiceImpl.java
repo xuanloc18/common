@@ -77,7 +77,7 @@ public class DefaultServiceImpl implements IAuthService {
 
     @Override
     public Boolean enableUser(String token, String id, UserUpdateRequest request) {
-        User user = utilUser.getUserDomainById(id);
+        User user = utilUser.finUserId(id);
         user.enabled();
         userRepository.save(user);
         userKCLService.enableUser(
@@ -86,7 +86,7 @@ public class DefaultServiceImpl implements IAuthService {
     }
 
     public Boolean delete(String id) {
-        User user = utilUser.getUserDomainById(id);
+        User user = utilUser.finUserId(id);
         user.deleted();
         userRepository.save(user);
         return true;
@@ -94,7 +94,7 @@ public class DefaultServiceImpl implements IAuthService {
 
     @Override
     public Boolean resetPassword(String token, String id, ResetPassword resetPassword) {
-        User user = utilUser.getUserDomainById(id);
+        User user = utilUser.finUserId(id);
         user.forgotPassword(passwordEncoder.encode(resetPassword.getValue()));
         userRepository.save(user);
         userKCLService.resetPassWord(

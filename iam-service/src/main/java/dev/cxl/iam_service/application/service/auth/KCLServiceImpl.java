@@ -16,8 +16,8 @@ import dev.cxl.iam_service.application.dto.request.UserUpdateRequest;
 import dev.cxl.iam_service.application.service.impl.UserKCLServiceImpl;
 import dev.cxl.iam_service.application.service.impl.UserServiceImpl;
 import dev.cxl.iam_service.application.service.impl.UtilUserServiceImpl;
-import dev.cxl.iam_service.infrastructure.entity.UserEntity;
-import dev.cxl.iam_service.infrastructure.persistent.JpaUserRepository;
+import dev.cxl.iam_service.domain.domainentity.User;
+import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
 
 @Service
 public class KCLServiceImpl implements IAuthService {
@@ -26,7 +26,7 @@ public class KCLServiceImpl implements IAuthService {
 
     private final UserKCLServiceImpl userKCLService;
 
-    private final JpaUserRepository userRepository;
+    private final UserRepositoryDomain userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -35,12 +35,12 @@ public class KCLServiceImpl implements IAuthService {
     public KCLServiceImpl(
             UserServiceImpl userService,
             UserKCLServiceImpl userKCLService,
-            JpaUserRepository userRespository,
+            UserRepositoryDomain userRepository,
             PasswordEncoder passwordEncoder,
             UtilUserServiceImpl utilUser) {
         this.userService = userService;
         this.userKCLService = userKCLService;
-        this.userRepository = userRespository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.utilUser = utilUser;
     }
@@ -69,21 +69,21 @@ public class KCLServiceImpl implements IAuthService {
 
     @Override
     public Boolean enableUser(String token, String id, UserUpdateRequest request) throws ParseException {
-        UserEntity user =
-                userRepository.findByUserKCLID(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setEnabled(request.getEnabled());
+        User user = userRepository.findByUserKCLID(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.enabled();
         userRepository.save(user);
         userKCLService.enableUser(userKCLService.tokenExchangeResponse().getAccessToken(), id, request);
         return null;
     }
 
     @Override
-    public Boolean resetPassword(String token, String id, ResetPassword resetPassword) throws ParseException {
-        UserEntity user = utilUser.finUserId(id);
+    public Boolean resetPassword(String token, String id, ResetPassword resetPassword) {
+        User user = utilUser.finUserId(id);
         userKCLService.resetPassWord(
                 userKCLService.tokenExchangeResponse().getAccessToken(), user.getUserKCLID(), resetPassword);
-        user.setPassWord(passwordEncoder.encode(resetPassword.getValue()));
+        user.replacePassword(passwordEncoder.encode(resetPassword.getValue()));
         userRepository.save(user);
+
         return null;
     }
 }

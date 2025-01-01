@@ -14,9 +14,9 @@ import dev.cxl.iam_service.infrastructure.entity.RoleEntity;
 public interface RoleMapper {
     RoleEntity toRole(Role roleDomain);
 
-    List<RoleEntity> toRoles(List<Role> roleDomains);
+    List<Role> toRoles(List<RoleEntity> roleDomains);
 
-    RoleResponse toRoleResponse(RoleEntity role);
+    RoleResponse toRoleResponse(Role role);
 
     Role toRoleDomain(RoleEntity role);
 

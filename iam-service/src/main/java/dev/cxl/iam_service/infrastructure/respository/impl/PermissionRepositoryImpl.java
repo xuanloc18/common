@@ -4,8 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+import com.evo.common.exception.AppException;
+import com.evo.common.exception.ErrorCode;
 
 import dev.cxl.iam_service.application.mapper.PermissionMapper;
 import dev.cxl.iam_service.domain.domainentity.Permission;
@@ -25,13 +29,36 @@ public class PermissionRepositoryImpl implements PermissionRepositoryDomain {
     }
 
     @Override
-    public PermissionEntity save(Permission permission) {
-        return jpaPermissionRespository.save(permissionMapper.toPermissionEntity(permission));
+    public Permission save(Permission permission) {
+        return permissionMapper.toPermission(
+                jpaPermissionRespository.save(permissionMapper.toPermissionEntity(permission)));
     }
 
     @Override
-    public Page<PermissionEntity> findAll(Pageable pageable) {
-        return jpaPermissionRespository.findAll(pageable);
+    public boolean saveAll(List<Permission> domains) {
+        jpaPermissionRespository.saveAll(permissionMapper.toPermissionEntities(domains));
+        return true;
+    }
+
+    @Override
+    public boolean delete(Permission domain) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteById(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean existsById(String s) {
+        return false;
+    }
+
+    @Override
+    public Page<Permission> findAll(Pageable pageable) {
+
+        return mapToRolePage(jpaPermissionRespository.findAll(pageable));
     }
 
     @Override
@@ -40,27 +67,27 @@ public class PermissionRepositoryImpl implements PermissionRepositoryDomain {
     }
 
     @Override
-    public List<PermissionEntity> findAllByIdIn(List<String> ids) {
-        return jpaPermissionRespository.findAllById(ids);
+    public List<Permission> findAllByIds(List<String> ids) {
+        return permissionMapper.toPermissions(jpaPermissionRespository.findAllById(ids));
     }
 
     @Override
-    public Optional<PermissionEntity> findByResourceCodeAndScope(String resourceCode, String scope) {
-        return jpaPermissionRespository.findByResourceCodeAndScope(resourceCode, scope);
+    public List<Permission> findPermissionIdByUser(String userID) {
+        return permissionMapper.toPermissions(jpaPermissionRespository.findPermissionIdByUser(userID));
     }
 
     @Override
-    public Optional<String> findPermissionIdByUserAndScope(String userID, String resourceCode, String scope) {
-        return jpaPermissionRespository.findPermissionIdByUserAndScope(userID, resourceCode, scope);
+    public Optional<Permission> findById(String id) {
+        PermissionEntity permissionEntity = jpaPermissionRespository
+                .findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_PERMISSION_NOT_EXISTED));
+        return Optional.of(permissionMapper.toPermission(permissionEntity));
     }
 
-    @Override
-    public List<PermissionEntity> findPermissionIdByUser(String userID) {
-        return jpaPermissionRespository.findPermissionIdByUser(userID);
-    }
-
-    @Override
-    public Optional<PermissionEntity> findById(String id) {
-        return jpaPermissionRespository.findById(id);
+    public Page<Permission> mapToRolePage(Page<PermissionEntity> permissionEntities) {
+        List<Permission> roles = permissionEntities.getContent().stream()
+                .map(permissionMapper::toPermission) // Chuyển đổi từng `RoleEntity` thành `Role`
+                .toList();
+        return new PageImpl<>(roles, permissionEntities.getPageable(), permissionEntities.getTotalElements());
     }
 }

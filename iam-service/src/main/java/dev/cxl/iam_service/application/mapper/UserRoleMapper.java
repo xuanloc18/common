@@ -11,5 +11,9 @@ import dev.cxl.iam_service.infrastructure.entity.UserRoleEntity;
 public interface UserRoleMapper {
     List<UserRoleEntity> toUserRoles(List<UserRole> userRoleDomain);
 
+    UserRoleEntity toUserRole(UserRole userRole);
+
+    UserRole toUserRole(UserRoleEntity userRoleDomain);
+
     List<UserRole> toUserRoleDomain(List<UserRoleEntity> userRoles);
 }

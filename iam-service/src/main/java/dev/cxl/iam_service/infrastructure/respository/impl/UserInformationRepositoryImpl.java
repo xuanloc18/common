@@ -32,7 +32,7 @@ public class UserInformationRepositoryImpl implements UserInformationRepositoryD
     }
 
     @Override
-    public List<UserInformationEntity> saveAll(List<UserInformationEntity> userInformation) {
-        return jpaUserInformationRepository.saveAll(userInformation);
+    public void saveAll(List<UserInformationEntity> userInformation) {
+        jpaUserInformationRepository.saveAll(userInformation);
     }
 }

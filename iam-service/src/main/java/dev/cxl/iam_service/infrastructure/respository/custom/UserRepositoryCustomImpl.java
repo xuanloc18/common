@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import dev.cxl.iam_service.application.mapper.UserMapper;
-import dev.cxl.iam_service.domain.query.UserSearchQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -18,11 +16,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import dev.cxl.iam_service.application.dto.request.UserSearchRequest;
+import dev.cxl.iam_service.application.mapper.UserMapper;
+import dev.cxl.iam_service.domain.query.UserSearchQuery;
 import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Service
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
-    private final UserMapper  userMapper;
+    private final UserMapper userMapper;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -33,7 +33,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
     @Override
     public Page<UserEntity> search(UserSearchRequest request) {
-        UserSearchQuery userSearchQuery=userMapper.toUserUserSearchCommand(request);
+        UserSearchQuery userSearchQuery = userMapper.toUserUserSearchCommand(request);
         Map<String, Object> values = new HashMap<>();
         String sql = "select u from UserEntity u " + createWhereQuery(userSearchQuery, values)
                 + createOrderQuery(userSearchQuery.getSortBy());

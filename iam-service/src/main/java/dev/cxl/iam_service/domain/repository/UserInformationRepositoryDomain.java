@@ -11,5 +11,5 @@ public interface UserInformationRepositoryDomain {
 
     List<UserInformationEntity> findAll();
 
-    List<UserInformationEntity> saveAll(List<UserInformationEntity> userInformation);
+    void saveAll(List<UserInformationEntity> userInformation);
 }

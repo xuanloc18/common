@@ -22,7 +22,6 @@ import dev.cxl.iam_service.domain.command.CreateRoleCommand;
 import dev.cxl.iam_service.domain.command.RolePermissionCommand;
 import dev.cxl.iam_service.domain.domainentity.Role;
 import dev.cxl.iam_service.domain.repository.RoleRepositoryDomain;
-import dev.cxl.iam_service.infrastructure.entity.RoleEntity;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +53,11 @@ public class RoleServiceImpl implements RoleService {
         CreateRoleCommand createRoleCommand = roleMapper.toCreateRoleCommand(request);
         Boolean check = roleRepository.existsByCode(request.getCode());
         if (check) throw new AppException(ErrorCode.ROLE_EXISTED);
-        Role roleDomain = new Role(createRoleCommand);
+        List<String> idPerExist = null;
+        if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
+            idPerExist = permissionService.listPerExit(request.getPermissions());
+        }
+        Role roleDomain = new Role(createRoleCommand, idPerExist);
         return roleMapper.toRoleResponse(roleRepository.save(roleDomain));
     }
 
@@ -62,20 +65,24 @@ public class RoleServiceImpl implements RoleService {
     public void roleAddPermission(RolePermissionRequest request) {
         RolePermissionCommand rolePermissionCommand =
                 rolePermissionMapper.rolePermissionToRolePermissionCommand(request);
-        Role role = roleRepository.getRoleByCode(rolePermissionCommand.getRoleCode());
+        Role role = roleRepository
+                .findByCode(rolePermissionCommand.getRoleCode())
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         List<String> listPerExits = permissionService.listPerExit(rolePermissionCommand.getPermissionIds());
         role.roleAddPermissions(listPerExits);
-        roleRepository.saveAfterAddPer(role);
+        roleRepository.save(role);
     }
 
     @Override
     public void roleRemovePermission(RolePermissionRequest request) {
         RolePermissionCommand rolePermissionCommand =
                 rolePermissionMapper.rolePermissionToRolePermissionCommand(request);
-        Role role = roleRepository.getRoleByCode(rolePermissionCommand.getRoleCode());
+        Role role = roleRepository
+                .findByCode(rolePermissionCommand.getRoleCode())
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         List<String> listPerExits = permissionService.listPerExit(rolePermissionCommand.getPermissionIds());
         role.roleDeletePermissions(listPerExits);
-        roleRepository.saveAfterDeletePer(role);
+        roleRepository.save(role);
     }
 
     @Override
@@ -95,7 +102,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void delete(String id) {
-        Role role = roleRepository.findById(id);
+        Role role = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         role.delete();
         roleRepository.save(role);
     }
@@ -103,7 +110,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<String> listRolesExit(List<String> roleCodes) {
         return roleRepository.findAllByCodeIn(roleCodes).stream()
-                .map(RoleEntity::getId)
+                .map(Role::getId)
                 .collect(Collectors.toList());
     }
 }

@@ -7,9 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +22,6 @@ import com.nimbusds.jwt.SignedJWT;
 
 import dev.cxl.iam_service.application.configuration.SecurityUtils;
 import dev.cxl.iam_service.application.dto.request.*;
-import dev.cxl.iam_service.application.dto.response.PageResponse;
 import dev.cxl.iam_service.application.dto.response.UserResponse;
 import dev.cxl.iam_service.application.mapper.UserMapper;
 import dev.cxl.iam_service.application.service.custom.UserService;
@@ -34,7 +30,6 @@ import dev.cxl.iam_service.domain.command.ForgotPassWordCommand;
 import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.domain.enums.UserAction;
 import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
-import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
@@ -98,7 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(UserCreationRequest request) {
+    public User createUser(UserCreationRequest request) {
         UserCreationCommand userCreationCommand = userMapper.toUserUserCreationCommand(request);
         userCreationCommand.setPassWord(passwordEncoder.encode(request.getPassWord()));
         if (userRepository.existsByUserMail(userCreationCommand.getUserMail())) {
@@ -111,12 +106,12 @@ public class UserServiceImpl implements UserService {
         User user = new User(userCreationCommand, () -> userKCLService.createUserKCL(request), listRolesExits);
         // Save userRole
         twoFactorAuthService.sendCreatUser(user.getUserMail());
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
     public void confirmCreateUser(String email, String otp) {
-        User user = userRepository.getUserByEmail(email);
+        User user = utilUser.findUserMail(email);
         ConfirmCreateUserCommand confirmCreateUserCommand = new ConfirmCreateUserCommand(email, otp);
         Boolean check = twoFactorAuthService.validateOtp(AuthenticationRequestTwo.builder()
                 .userMail(confirmCreateUserCommand.getUserMail())
@@ -131,35 +126,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageResponse<UserResponse> getAllUsers(int page, int size) {
-        Sort sort = Sort.by("userID").descending();
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-        var pageData = userRepository.findAll(pageable);
-        return PageResponse.<UserResponse>builder()
-                .currentPage(page)
-                .pageSize(pageData.getSize())
-                .totalPages(pageData.getTotalPages())
-                .totalElements(pageData.getTotalElements())
-                .data(pageData.getContent().stream()
-                        .map(userMapper::toUserResponse)
-                        .toList())
-                .build();
-    }
-
-    @Override
-    public UserResponse updateUser(UserUpdateRequest request) {
+    public void updateUser(UserUpdateRequest request) {
         UserUpdateCommand userUpdateCommand = userMapper.toUserUpdateCommand(request);
         String userID = SecurityUtils.getAuthenticatedUserID();
-        User user = userRepository.getUserByUserId(userID);
+        User user = utilUser.finUserId(userID);
         user.update(userUpdateCommand);
         activityService.createHistoryActivity(user.getUserID(), UserAction.UPDATE_PROFILE);
-        return userMapper.toUserResponse(userRepository.save(user));
+        userRepository.save(user);
     }
 
     @Override
     public UserResponse getMyInfo() {
         String id = SecurityUtils.getAuthenticatedUserID();
-        UserEntity user;
+        User user;
         if (idpEnable) {
             user = utilUser.finUserKCLId(id);
         } else {
@@ -170,7 +149,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getInfo(String id) {
-        UserEntity user;
+        User user;
         if (idpEnable) {
             user = utilUser.finUserKCLId(id);
         } else {
@@ -187,7 +166,7 @@ public class UserServiceImpl implements UserService {
         command.setOldPassword(passwordEncoder.encode(command.getOldPassword()));
         command.setNewPassword(passwordEncoder.encode(command.getNewPassword()));
         String id = SecurityUtils.getAuthenticatedUserID();
-        User user = userRepository.getUserByUserId(id);
+        User user = utilUser.finUserId(id);
         user.changePassword(command);
 
         // Save history activity
@@ -198,7 +177,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Boolean createProfile(MultipartFile file) {
         String id = SecurityUtils.getAuthenticatedUserID();
-        User user = utilUser.getUserDomainById(id);
+        User user = utilUser.finUserId(id);
         APIResponse<String> apiResponse = client.createProfile(file, SecurityUtils.getAuthenticatedUserID());
         user.createProfile(apiResponse.getResult());
         userRepository.save(user);
@@ -208,14 +187,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<Resource> viewProfile() {
         String userID = SecurityUtils.getAuthenticatedUserID();
-        User user = utilUser.getUserDomainById(userID);
+        User user = utilUser.finUserId(userID);
         ResponseEntity<Resource> response = client.viewProfile(user.getProfile());
         return ResponseEntity.ok().headers(response.getHeaders()).body(response.getBody());
     }
 
     @Override
     public void sendToken(String email) {
-        utilUser.finUserMail(email);
+        utilUser.findUserMail(email);
         String token = authenticationService.generateToken(email);
         emailService.SendEmail(email, token);
     }
@@ -232,7 +211,7 @@ public class UserServiceImpl implements UserService {
         }
         SignedJWT signedJWT = SignedJWT.parse(forgotPassWord.getToken());
         String userid = signedJWT.getJWTClaimsSet().getSubject();
-        User user = utilUser.getUserDomainById(userid);
+        User user = utilUser.finUserId(userid);
         user.forgotPassword(passwordEncoder.encode(forgotPassWord.getNewPass()));
         userRepository.save(user);
 
@@ -243,18 +222,18 @@ public class UserServiceImpl implements UserService {
     }
 
     public void userAddRole(UserRoleRequest userRoleRequest) {
-        User user = utilUser.getUserDomainByMail(userRoleRequest.getUserMail());
+        User user = utilUser.findUserMail(userRoleRequest.getUserMail());
         UserRoleCommand userRoleCommand = userMapper.toUserRoleCommand(userRoleRequest);
         List<String> roleIDs = roleService.listRolesExit(userRoleCommand.getRoleCodes());
         user.addUserRole(roleIDs);
-        userRepository.saveAfterAddRole(user);
+        userRepository.save(user);
     }
 
     public void userDeleteRole(UserRoleRequest userRoleRequest) {
-        User user = utilUser.getUserDomainByMail(userRoleRequest.getUserMail());
+        User user = utilUser.findUserMail(userRoleRequest.getUserMail());
         UserRoleCommand userRoleCommand = userMapper.toUserRoleCommand(userRoleRequest);
         List<String> roleIDs = roleService.listRolesExit(userRoleCommand.getRoleCodes());
         user.deleteUserRole(roleIDs);
-        userRepository.saveAfterDeleteRole(user);
+        userRepository.save(user);
     }
 }

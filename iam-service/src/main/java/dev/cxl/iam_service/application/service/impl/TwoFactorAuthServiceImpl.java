@@ -13,7 +13,7 @@ import com.evo.common.exception.ErrorCode;
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequest;
 import dev.cxl.iam_service.application.dto.request.AuthenticationRequestTwo;
 import dev.cxl.iam_service.application.service.custom.TwoFactorAuthService;
-import dev.cxl.iam_service.infrastructure.entity.UserEntity;
+import dev.cxl.iam_service.domain.domainentity.User;
 
 @Service
 public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
@@ -37,7 +37,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
     }
 
     public void sendOtpMail(AuthenticationRequest authenticationRequest) {
-        UserEntity user = utilUser.finUserMail(authenticationRequest.getUserMail());
+        User user = utilUser.findUserMail(authenticationRequest.getUserMail());
         if (!user.getEnabled()) {
             throw new AppException(ErrorCode.USER_DIS_ENABLE);
         }
@@ -69,7 +69,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 
     public Boolean validateOtp(AuthenticationRequestTwo authenticationRequestTwo) {
 
-        UserEntity user = utilUser.finUserMail(authenticationRequestTwo.getUserMail());
+        User user = utilUser.findUserMail(authenticationRequestTwo.getUserMail());
         String otp = redisTemplate.opsForValue().get(user.getUserMail());
         if (otp != null && otp.equals(authenticationRequestTwo.getOtp())) {
             redisTemplate.delete(authenticationRequestTwo.getUserMail()); // Xóa OTP khỏi Redis

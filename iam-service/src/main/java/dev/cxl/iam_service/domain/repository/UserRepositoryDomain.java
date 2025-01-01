@@ -2,30 +2,19 @@ package dev.cxl.iam_service.domain.repository;
 
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.evo.common.DomainRepository;
 
 import dev.cxl.iam_service.domain.domainentity.User;
-import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
-public interface UserRepositoryDomain {
-    User getUserByEmail(String email);
+public interface UserRepositoryDomain extends DomainRepository<User, String> {
 
-    User getUserByUserId(String userId);
+    User save(User user);
 
-    void saveAfterDeleteRole(User user);
+    Optional<User> findById(String id);
 
-    void saveAfterAddRole(User user);
+    Optional<User> findByEmail(String userMail);
 
-    UserEntity save(User user);
-
-    Optional<UserEntity> findById(String id);
-
-    Optional<UserEntity> findByUserMail(String userMail);
-
-    Optional<UserEntity> findByUserKCLID(String string);
+    Optional<User> findByUserKCLID(String string);
 
     boolean existsByUserMail(String userMail);
-
-    Page<UserEntity> findAll(Pageable pageable);
 }

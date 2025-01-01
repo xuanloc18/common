@@ -3,14 +3,16 @@ package dev.cxl.iam_service.domain.repository;
 import java.util.List;
 import java.util.Optional;
 
-import dev.cxl.iam_service.infrastructure.entity.RolePermissionEntity;
+import com.evo.common.DomainRepository;
 
-public interface RolePermissionRepositoryDomain {
-    RolePermissionEntity save(RolePermissionEntity rolePermission);
+import dev.cxl.iam_service.domain.domainentity.RolePermission;
 
-    List<RolePermissionEntity> findByRoleId(String id);
+public interface RolePermissionRepositoryDomain extends DomainRepository<RolePermission, String> {
+    RolePermission save(RolePermission rolePermission);
 
-    Optional<RolePermissionEntity> findById(String id);
+    List<RolePermission> findByRoleId(String id);
 
-    List<RolePermissionEntity> saveAll(List<RolePermissionEntity> rolePermissions);
+    Optional<RolePermission> findById(String id);
+
+    boolean saveAll(List<RolePermission> rolePermissions);
 }

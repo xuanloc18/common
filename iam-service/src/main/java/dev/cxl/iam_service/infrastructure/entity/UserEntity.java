@@ -55,5 +55,5 @@ public class UserEntity extends AuditableEntity {
 
     @Builder.Default
     @Column(name = "is_root", nullable = false)
-    private boolean isRoot = false;
+    boolean root = false;
 }

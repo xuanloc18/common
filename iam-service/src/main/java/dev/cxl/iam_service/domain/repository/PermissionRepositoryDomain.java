@@ -6,23 +6,20 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.evo.common.DomainRepository;
+
 import dev.cxl.iam_service.domain.domainentity.Permission;
-import dev.cxl.iam_service.infrastructure.entity.PermissionEntity;
 
-public interface PermissionRepositoryDomain {
-    PermissionEntity save(Permission permission);
+public interface PermissionRepositoryDomain extends DomainRepository<Permission, String> {
+    Permission save(Permission permission);
 
-    Page<PermissionEntity> findAll(Pageable pageable);
+    Page<Permission> findAll(Pageable pageable);
 
     Boolean existsByResourceCodeAndScope(String resourceCode, String scope);
 
-    List<PermissionEntity> findAllByIdIn(List<String> ids);
+    List<Permission> findAllByIds(List<String> ids);
 
-    Optional<PermissionEntity> findByResourceCodeAndScope(String resourceCode, String scope);
+    List<Permission> findPermissionIdByUser(String userID);
 
-    Optional<String> findPermissionIdByUserAndScope(String userID, String resourceCode, String scope);
-
-    List<PermissionEntity> findPermissionIdByUser(String userID);
-
-    Optional<PermissionEntity> findById(String id);
+    Optional<Permission> findById(String id);
 }

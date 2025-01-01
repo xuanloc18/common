@@ -12,8 +12,8 @@ import dev.cxl.iam_service.domain.command.UserReplacePassCommand;
 import dev.cxl.iam_service.domain.command.UserRoleCommand;
 import dev.cxl.iam_service.domain.command.UserUpdateCommand;
 import dev.cxl.iam_service.domain.domainentity.User;
-import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 import dev.cxl.iam_service.domain.query.UserSearchQuery;
+import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -23,7 +23,7 @@ public interface UserMapper {
 
     User toUserDomain(UserEntity request);
 
-    UserResponse toUserResponse(UserEntity user);
+    UserResponse toUserResponse(User user);
 
     UserCreationCommand toUserUserCreationCommand(UserCreationRequest request);
 

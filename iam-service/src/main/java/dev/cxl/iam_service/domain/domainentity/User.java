@@ -34,7 +34,7 @@ public class User extends Auditable {
     String avatar;
     Boolean enabled;
     Boolean deleted;
-    boolean isRoot;
+    boolean root;
     List<UserRole> userRoles = new ArrayList<>();
 
     public User(UserCreationCommand userCreationCommand, Supplier<String> userKCLSupplier, List<String> rolesExits) {
@@ -49,7 +49,7 @@ public class User extends Auditable {
         this.avatar = userCreationCommand.getAvatar();
         this.enabled = false;
         this.deleted = false;
-        this.isRoot = false;
+        this.root = false;
         this.assignUserRoles(rolesExits);
     }
 
@@ -62,15 +62,31 @@ public class User extends Auditable {
         }
     }
 
-    public void update(UserUpdateCommand userUpdateCommand) {
-        this.firstName = userUpdateCommand.getFirstName();
-        this.lastName = userUpdateCommand.getLastName();
-        this.dateOfBirth = userUpdateCommand.getDateOfBirth();
-        this.enabled = userUpdateCommand.getEnabled();
-        this.deleted = userUpdateCommand.getDeleted();
+    public void update(UserUpdateCommand cmd) {
+        if (cmd == null) {
+            return;
+        }
+        if (cmd.getFirstName() != null) {
+            this.firstName = cmd.getFirstName();
+        }
+        if (cmd.getLastName() != null) {
+            this.lastName = cmd.getLastName();
+        }
+        if (cmd.getDateOfBirth() != null) {
+            this.dateOfBirth = cmd.getDateOfBirth();
+        }
+        if (cmd.getEnabled() != null) {
+            this.enabled = cmd.getEnabled();
+        }
+        if (cmd.getDeleted() != null) {
+            this.deleted = cmd.getDeleted();
+        }
     }
 
     public void changePassword(UserReplacePassCommand userReplacePassCommand) {
+        if (userReplacePassCommand == null) {
+            return;
+        }
         boolean checkPass = userReplacePassCommand.getOldPassword().equals(this.passWord);
         if (!checkPass) throw new AppException(ErrorCode.INVALID_KEY);
         boolean aBoolean = userReplacePassCommand.getConfirmPassword().equals(userReplacePassCommand.getNewPassword());
@@ -78,16 +94,35 @@ public class User extends Auditable {
         this.passWord = userReplacePassCommand.getNewPassword();
     }
 
+    public void replacePassword(String passWord) {
+        this.passWord = passWord;
+    }
+
     public void addUserRole(List<String> roleIds) {
-        roleIds.forEach(roleId -> {
-            UserRole userRole = new UserRole(this.userID, roleId);
-            this.userRoles.add(userRole);
-        });
+        // Lấy danh sách các roleID hiện tại
+        List<String> existingRoleIds =
+                this.userRoles.stream().map(UserRole::getRoleID).toList();
+
+        // Tìm các roleId cần cập nhật trạng thái delete = false
+        this.getUserRoles().stream()
+                .filter(userRole -> roleIds.contains(userRole.getRoleID()) && userRole.getDeleted())
+                .forEach(UserRole::setDeleted);
+
+        // Tìm các roleId chưa tồn tại và tạo UserRole mới
+        List<UserRole> userRolesNew = roleIds.stream()
+                .filter(roleId -> !existingRoleIds.contains(roleId)) // Lọc các roleId mới
+                .map(roleId -> new UserRole(this.userID, roleId)) // Tạo đối tượng UserRole mới
+                .toList();
+
+        // Thêm các UserRole mới vào danh sách hiện tại
+        this.userRoles.addAll(userRolesNew);
     }
 
     public void deleteUserRole(List<String> roleIds) {
-        roleIds.forEach(roleId -> {
-            userRoles.removeIf(userRole -> userRole.getRoleID().equals(roleId));
+        this.userRoles.forEach(userRoles -> {
+            if (roleIds.contains(userRoles.getRoleID())) {
+                userRoles.delete();
+            }
         });
     }
 

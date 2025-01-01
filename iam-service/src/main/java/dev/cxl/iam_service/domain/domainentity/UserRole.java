@@ -26,6 +26,10 @@ public class UserRole extends Auditable {
         this.deleted = false;
     }
 
+    public void setDeleted() {
+        this.deleted = false;
+    }
+
     public void delete() {
         this.deleted = true;
     }

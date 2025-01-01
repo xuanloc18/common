@@ -9,7 +9,6 @@ import dev.cxl.iam_service.application.service.custom.UtilUserService;
 import dev.cxl.iam_service.domain.domainentity.User;
 import dev.cxl.iam_service.domain.repository.UserInformationRepositoryDomain;
 import dev.cxl.iam_service.domain.repository.UserRepositoryDomain;
-import dev.cxl.iam_service.infrastructure.entity.UserEntity;
 
 @Service
 public class UtilUserServiceImpl implements UtilUserService {
@@ -25,32 +24,22 @@ public class UtilUserServiceImpl implements UtilUserService {
     }
 
     @Override
-    public UserEntity finUserId(String id) {
+    public User finUserId(String id) {
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     @Override
-    public UserEntity finUserKCLId(String kCLSID) {
+    public User finUserKCLId(String kCLSID) {
         return userRepository.findByUserKCLID(kCLSID).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     @Override
-    public UserEntity finUserMail(String userMail) {
-        return userRepository.findByUserMail(userMail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    public User findUserMail(String userMail) {
+        return userRepository.findByEmail(userMail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     @Override
     public boolean userExists(String userName) {
         return userInformationRepository.existsUserInformationByUsername(userName);
-    }
-
-    @Override
-    public User getUserDomainById(String userID) {
-        return userRepository.getUserByUserId(userID);
-    }
-
-    @Override
-    public User getUserDomainByMail(String userMail) {
-        return userRepository.getUserByEmail(userMail);
     }
 }
