@@ -53,7 +53,7 @@ public class User extends Auditable {
         this.assignUserRoles(rolesExits);
     }
 
-    public void assignUserRoles(List<String> rolesExits) {
+    private void assignUserRoles(List<String> rolesExits) {
         if (rolesExits != null && !rolesExits.isEmpty()) {
             rolesExits.forEach(roleId -> {
                 UserRole userRole = new UserRole(this.userID, roleId);

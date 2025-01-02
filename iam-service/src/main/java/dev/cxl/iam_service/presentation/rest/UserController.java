@@ -132,12 +132,14 @@ public class UserController {
         return userService.viewProfile();
     }
 
+    @PreAuthorize("hasPermission('USER_DATA','UPDATE')")
     @PostMapping("/role")
     public APIResponse<String> userAddRole(@RequestBody UserRoleRequest request) {
         userService.userAddRole(request);
         return APIResponse.<String>builder().result("Add UserRole successful").build();
     }
 
+    @PreAuthorize("hasPermission('USER_DATA','UPDATE')")
     @PostMapping("/role/deleted")
     public APIResponse<String> userDeleteRole(@RequestBody UserRoleRequest request) {
         userService.userDeleteRole(request);

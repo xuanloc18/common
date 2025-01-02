@@ -108,8 +108,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("user_id", user.getUserID().toString())
-                .claim("id_user", user.getUserID().toString())
+                .claim("user_id", user.getUserID())
+                .claim("given_name", user.getUserName())
                 .claim("name", user.getUserName())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -123,6 +123,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
     // Token client
     public String generateClientToken(DefaultClientTokenResponse request) {
         clientsService.checkClientExists(request.getClientId(), request.getClientSecret());
@@ -132,14 +133,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("user_id", request.getClientId())
+                .subject(request.getClientId())
                 .claim("client_id", request.getClientId())
+                .claim("user_id", request.getClientId())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
             jwsObject.sign(new RSASSASigner(keyProvider.getKeyPair().getPrivate()));
+            log.info("client created {}", jwsObject.serialize());
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("can not create token", e);

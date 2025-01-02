@@ -2,6 +2,7 @@ package dev.cxl.iam_service.application.service.impl;
 
 import java.util.List;
 
+import dev.cxl.iam_service.domain.command.UserCreationCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -52,9 +52,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             claim = "client_id";
             id = token.getClaim("client_id");
             isClient = Boolean.TRUE;
-        } else if (StringUtils.hasText(token.getClaimAsString("id_user"))) {
-            claim = "id_user";
-            id = token.getClaim("id_user");
+        } else if (StringUtils.hasText(token.getClaimAsString("given_name"))) {
+            claim = "given_name";
+            id = token.getClaim("sub");
         }
 
         Optional<UserAuthority> optionalUserAuthority = enrichAuthority(token, claim);
@@ -82,7 +82,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Optional<UserAuthority> enrichAuthority(Jwt token, String claim) {
-        String id = token.getClaimAsString(claim);
+        String id = token.getClaimAsString("sub");
         if (id == null) {
             log.warn("Claim {} is missing or invalid", claim);
             return Optional.empty();
@@ -91,7 +91,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         switch (claim) {
             case "client_id":
                 return Optional.ofNullable(authorityService.getClientAuthority(id));
-            case "id_user":
+            case "given_name":
                 return Optional.ofNullable(authorityService.getUserAuthority(UUID.fromString(id)));
             default:
                 log.warn("Unknown claim type: {}", claim);

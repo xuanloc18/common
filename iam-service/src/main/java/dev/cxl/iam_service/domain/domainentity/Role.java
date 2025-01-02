@@ -19,7 +19,7 @@ public class Role extends Auditable {
     String code;
     String description;
     Boolean deleted;
-    List<RolePermission> rolePermission=new ArrayList<>();
+    List<RolePermission> rolePermission = new ArrayList<>();
 
     public Role(CreateRoleCommand createRoleCommand, List<String> idPerExits) {
         this.id = UUID.randomUUID().toString();
@@ -30,7 +30,7 @@ public class Role extends Auditable {
         this.assignRolePermissions(idPerExits);
     }
 
-    public void assignRolePermissions(List<String> idPerExits) {
+    private void assignRolePermissions(List<String> idPerExits) {
         if (idPerExits != null && !idPerExits.isEmpty()) {
             idPerExits.forEach(permission -> {
                 RolePermission rolePermissionDomain = new RolePermission(this.id, permission);
@@ -43,11 +43,12 @@ public class Role extends Auditable {
         if (this.rolePermission == null) {
             this.rolePermission = new ArrayList<>();
         }
-        List<String> idPerExits =
-                this.rolePermission.stream().map(RolePermission::getPermissionId).toList();
+        List<String> idPerExits = this.rolePermission.stream()
+                .map(RolePermission::getPermissionId)
+                .toList();
         this.getRolePermission().stream()
-                .filter(rolePermissionDomain ->
-                        permissionIds.contains(rolePermissionDomain.getPermissionId()) && rolePermissionDomain.getDeleted())
+                .filter(rolePermission ->
+                        permissionIds.contains(rolePermission.getPermissionId()) && rolePermission.getDeleted())
                 .forEach(RolePermission::setDeleted);
 
         List<RolePermission> rolePermissions = permissionIds.stream()
@@ -55,13 +56,11 @@ public class Role extends Auditable {
                 .map(s -> new RolePermission(this.id, s))
                 .toList();
         this.rolePermission.addAll(rolePermissions);
-
-
     }
 
     public void roleDeletePermissions(List<String> permissionIds) {
         this.getRolePermission().stream()
-                .filter(rolePermissionDomain -> permissionIds.contains(rolePermissionDomain.getPermissionId()))
+                .filter(rolePermission -> permissionIds.contains(rolePermission.getPermissionId()))
                 .forEach(RolePermission::delete);
     }
 

@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class APIResponse<T> {
     @Builder.Default // mặc định sử dụng thuộc tính đã có giá trị có sẵn mà không tạo mới giá trị
     int code = 1000;
-
-    String mesage;
+    String message;
     T result;
 }

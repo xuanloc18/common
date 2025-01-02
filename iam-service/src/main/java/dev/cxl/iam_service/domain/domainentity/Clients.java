@@ -10,4 +10,9 @@ import lombok.ToString;
 public class Clients {
     private String clientId;
     private String clientSecret;
+
+    public Clients(String clientId, String clientSecret) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+    }
 }

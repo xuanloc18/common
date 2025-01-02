@@ -19,7 +19,7 @@ public class GlobalExceptionHanded {
         log.error("RuntimeException occurred: ", exception);
         APIResponse apiResponse = new APIResponse();
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        apiResponse.setMesage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
@@ -30,7 +30,7 @@ public class GlobalExceptionHanded {
         ErrorCode errorCode = ErrorCode.valueOf(enumKey);
         APIResponse apiResponse = new APIResponse();
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMesage(errorCode.getMessage());
+        apiResponse.setMessage(errorCode.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
@@ -39,7 +39,7 @@ public class GlobalExceptionHanded {
         ErrorCode errorCode = exception.getErrorCode();
         APIResponse apiResponse = new APIResponse();
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMesage(errorCode.getMessage());
+        apiResponse.setMessage(errorCode.getMessage());
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
@@ -49,7 +49,7 @@ public class GlobalExceptionHanded {
             return ResponseEntity.status(errorCode.getStatusCode())
                     .body(APIResponse.builder()
                             .code(errorCode.getCode())
-                            .mesage(errorCode.getMessage())
+                            .message(errorCode.getMessage())
                             .build());
         }
 

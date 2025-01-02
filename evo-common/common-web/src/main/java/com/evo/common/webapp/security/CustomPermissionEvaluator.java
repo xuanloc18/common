@@ -25,6 +25,9 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         if (userAuthentication.isRoot()) {
             return true;
         }
+        if ((userAuthentication.isClient())){
+            return true;
+        }
 
         return userAuthentication.getGrantedPermissions().stream()
                 .anyMatch(p -> p.equalsIgnoreCase(requiredPermission));

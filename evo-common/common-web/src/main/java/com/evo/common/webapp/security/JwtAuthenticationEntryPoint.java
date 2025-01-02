@@ -24,7 +24,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE); // cho biết dữ liệu sẽ là kiểu json
         APIResponse<?> apiResponse = APIResponse.builder()
                 .code(errorCode.getCode())
-                .mesage(errorCode.getMessage())
+                .message(errorCode.getMessage())
                 .build();
         ObjectMapper objectMapper = new ObjectMapper(); // đổi object về json
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
